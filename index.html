@@ -172,7 +172,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .pp-btn{width:100%;padding:8px;background:var(--gold);color:var(--ink);border:none;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 
 /* ── MODAL ── */
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;align-items:flex-end;backdrop-filter:blur(8px);}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1200;align-items:flex-end;backdrop-filter:blur(8px);}
 .modal-ov.on{display:flex;}
 .modal{background:var(--ink2);width:100%;max-height:92vh;overflow-y:auto;border-top:1px solid var(--line2);animation:slideUp .28s ease;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -1504,40 +1504,43 @@ function isMyVote(id) { return myVote === id; }
 async function castVote(e, id) {
   e.stopPropagation();
   if (!currentUser) {
-    // Save pending vote and trigger Google login
     localStorage.setItem('nocheba-pending-vote', id);
     showToast('Iniciá sesión para votar 👤');
     setTimeout(function(){ doLoginGoogle(); }, 600);
     return;
   }
-  if (isMyVote(id)) {
-    // Remove vote
+
+  var wasMyVote = isMyVote(id);
+  var prevVote = myVote;
+
+  // ── INSTANT VISUAL UPDATE ──
+  if (wasMyVote) {
     votes[id] = Math.max(0, (votes[id] || 1) - 1);
     myVote = null;
-    await sbDelete('user_votes', `user_id=eq.${currentUser.id}`);
+  } else {
+    if (prevVote !== null) votes[prevVote] = Math.max(0, (votes[prevVote] || 1) - 1);
+    myVote = id;
+    votes[id] = (votes[id] || 0) + 1;
+  }
+  delete voterCache[id];
+  if (prevVote !== null) delete voterCache[prevVote];
+  refreshModalVote(id);
+  if (prevVote !== null && prevVote !== id) refreshModalVote(prevVote);
+  renderAllUI();
+
+  // ── SAVE TO SUPABASE IN BACKGROUND ──
+  if (wasMyVote) {
+    await sbDelete('user_votes', 'user_id=eq.' + currentUser.id);
     await sbUpsert('votes', { venue_id: id, count: votes[id] });
     showToast('Voto eliminado');
   } else {
-    // Remove old vote if exists
-    if (myVote !== null) {
-      votes[myVote] = Math.max(0, (votes[myVote] || 1) - 1);
-      await sbUpsert('votes', { venue_id: myVote, count: votes[myVote] });
-      showToast('Voto cambiado a ' + venues.find(v=>v.id===id)?.name + ' 🎉');
-    } else {
-      showToast('¡Vas a ir a ' + venues.find(v=>v.id===id)?.name + '! 🎉');
-    }
-    myVote = id;
-    votes[id] = (votes[id] || 0) + 1;
-    // Save to Supabase
+    if (prevVote !== null) await sbUpsert('votes', { venue_id: prevVote, count: votes[prevVote] });
     await sbUpsert('votes', { venue_id: id, count: votes[id] });
     await sbUpsert('user_votes', { user_id: currentUser.id, venue_id: id, updated_at: new Date().toISOString() });
+    var vname = (venues.find(function(v){ return v.id===id; })||{}).name || '';
+    showToast(prevVote !== null ? 'Voto cambiado a ' + vname + ' 🎉' : '¡Vas a ir a ' + vname + '! 🎉');
   }
   await saveState();
-  // Invalidate voter cache (myVote already updated above)
-  delete voterCache[id];
-  // Re-render directly without reloading from Supabase (avoids race condition)
-  renderAllUI();
-  refreshModalVote(id);
 }
 
 // ── RENDER VOTERS PREVIEW (avatars + click to see all) ──
@@ -2070,6 +2073,9 @@ function openModal(id) {
 
   document.getElementById('modalOv').classList.add('on');
   document.body.style.overflow = 'hidden';
+  // Hide chat fab so it doesn't intercept clicks
+  var fab = document.getElementById('chatFab');
+  if (fab) fab.style.display = 'none';
 
   // Load voters into preview — always inject current user
   getVotersForVenue(v.id).then(function(voters) {
@@ -2091,7 +2097,12 @@ function openModal(id) {
   }, 150);
 }
 function closeModalOv(e) { if(e.target===document.getElementById('modalOv')) closeModal(); }
-function closeModal() { document.getElementById('modalOv').classList.remove('on'); document.body.style.overflow=''; }
+function closeModal() { 
+  document.getElementById('modalOv').classList.remove('on'); 
+  document.body.style.overflow='';
+  var fab = document.getElementById('chatFab');
+  if (fab) fab.style.display = '';
+}
 
 // ── VOTERS LIST MODAL ──
 async function openVotersList(venueId) {
