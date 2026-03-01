@@ -2549,7 +2549,12 @@ async function openVotersList(venueId) {
       var youSub = document.createElement('div');
       youSub.style.cssText = 'font-size:10px;color:var(--gold);margin-top:2px;cursor:pointer;';
       youSub.textContent = 'Iniciá sesión para mostrar tu perfil →';
-      youSub.onclick = function(){ closeVotersList(); setTimeout(showAuth, 300); };
+      youSub.onclick = function(){
+        // Guardar venue para reabrir después del login
+        localStorage.setItem('nocheba-pending-venue', venueId);
+        closeVotersList();
+        setTimeout(showAuth, 300);
+      };
       youInfo.appendChild(youName); youInfo.appendChild(youSub);
       youRow.appendChild(youAv); youRow.appendChild(youInfo);
       anonSection.appendChild(youRow);
@@ -2786,6 +2791,12 @@ async function doRegister() {
   updateHeader();
   showToast('¡Bienvenido, ' + name + '! 🎉');
   renderAll();
+  // Reabrir venue pendiente si venía del panel de voters
+  const pendingVenueReg = localStorage.getItem('nocheba-pending-venue');
+  if (pendingVenueReg) {
+    localStorage.removeItem('nocheba-pending-venue');
+    setTimeout(function(){ openModal(parseInt(pendingVenueReg)); }, 600);
+  }
 }
 
 async function doLogin() {
@@ -2822,11 +2833,20 @@ async function doLogin() {
   updateHeader();
   showToast('¡Hola de nuevo, ' + user.name + '! 👋');
   renderAll();
+  // Reabrir venue pendiente si venía del panel de voters
+  const pendingVenueLogin = localStorage.getItem('nocheba-pending-venue');
+  if (pendingVenueLogin) {
+    localStorage.removeItem('nocheba-pending-venue');
+    setTimeout(function(){ openModal(parseInt(pendingVenueLogin)); }, 600);
+  }
 }
 
 async function doLoginGoogle() {
   try {
     showToast('Abriendo Google...');
+    // Preservar pending venue si existe (para reabrir modal tras OAuth redirect)
+    const pv = localStorage.getItem('nocheba-pending-venue');
+    if (pv) localStorage.setItem('nocheba-pending-venue', pv); // ya está guardado
     const redirectTo = window.location.origin + window.location.pathname;
     window.location.href = SB_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(redirectTo);
   } catch(e) {
@@ -2923,6 +2943,13 @@ async function handleOAuthCallback() {
     updateHeader();
     closeAuth();
     showToast('¡Bienvenido ' + currentUser.name.split(' ')[0] + '! 🎉');
+
+    // Reabrir venue pendiente si venía del panel de voters
+    const pendingVenue = localStorage.getItem('nocheba-pending-venue');
+    if (pendingVenue) {
+      localStorage.removeItem('nocheba-pending-venue');
+      setTimeout(function(){ openModal(parseInt(pendingVenue)); }, 600);
+    }
 
     // Execute pending vote if exists
     // Si había voto anónimo, lo persistimos a Supabase
