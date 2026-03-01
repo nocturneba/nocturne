@@ -441,6 +441,11 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 /* TOAST */
 .toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink3);border:1px solid var(--gold);color:var(--gold);font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 18px;opacity:0;transition:all .3s;z-index:800;white-space:nowrap;}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+/* ── VOTERS LIST OVERLAY ── */
+.voters-list-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.voters-list-ov.on{opacity:1;pointer-events:all;}
+.voters-list-panel{background:var(--ink2);width:100%;max-width:480px;max-height:70vh;border-top:1px solid var(--line);display:flex;flex-direction:column;transform:translateY(40px);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.voters-list-ov.on .voters-list-panel{transform:translateY(0);}
 </style>
 </head>
 <body>
@@ -1908,7 +1913,10 @@ function openModal(id) {
         <div class="ticket-note">🔒 Serás redirigido a Passline · Comprá tu entrada oficial ahí</div>
       </div>` : ''}
       <div class="msec" id="voters-section-${v.id}" style="display:none">
-        <div class="msec-ttl">Van esta noche 🔥</div>
+        <div class="msec-ttl" style="display:flex;align-items:center;justify-content:space-between;">
+          Van esta noche 🔥
+          <button onclick="openVotersList(${v.id})" style="background:none;border:1px solid var(--line2);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1px;padding:4px 10px;cursor:pointer;">VER TODOS →</button>
+        </div>
         <div class="voters-row" id="voters-${v.id}"></div>
       </div>
     </div>`;
@@ -1941,6 +1949,51 @@ function openModal(id) {
 }
 function closeModalOv(e) { if(e.target===document.getElementById('modalOv')) closeModal(); }
 function closeModal() { document.getElementById('modalOv').classList.remove('on'); document.body.style.overflow=''; }
+
+// ── VOTERS LIST MODAL ──
+async function openVotersList(venueId) {
+  const v = venues.find(x => x.id === venueId);
+  if (!v) return;
+  const voters = await getVotersForVenue(venueId);
+  const count = getV(venueId);
+
+  const ov = document.getElementById('votersListOv');
+  const inner = document.getElementById('votersListInner');
+
+  inner.innerHTML = `
+    <div style="padding:20px 20px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);">
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">${v.zone} · ${v.emoji}</div>
+        <div style="font-size:18px;font-weight:700;color:var(--white)">${v.name}</div>
+        <div style="font-size:11px;color:var(--gold);margin-top:2px">${count} persona${count!==1?'s':''} van esta semana</div>
+      </div>
+      <button onclick="closeVotersList()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px">✕</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:16px;">
+      ${voters.length ? voters.map(u => {
+        const av = u.avatar ? \`<img src="\${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">\` : u.name.charAt(0).toUpperCase();
+        const ig = u.instagram ? \`<a href="https://instagram.com/\${u.instagram}" target="_blank" style="color:var(--gold);font-size:11px;text-decoration:none;">@\${u.instagram}</a>\` : \`<span style="color:var(--muted);font-size:11px">Sin Instagram</span>\`;
+        return \`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--gold);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;overflow:hidden;flex-shrink:0;">\${av}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:3px">\${u.name}</div>
+            \${ig}
+          </div>
+        </div>\`;
+      }).join('') : '<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:13px;">Nadie votó este lugar todavía.</div>'}
+    </div>`;
+
+  ov.classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeVotersList() {
+  document.getElementById('votersListOv').classList.remove('on');
+  document.body.style.overflow = '';
+}
+function closeVotersListOv(e) {
+  if (e.target === document.getElementById('votersListOv')) closeVotersList();
+}
 
 // ── MP ──
 function openMp(id) {
@@ -2136,23 +2189,43 @@ async function handleOAuthCallback() {
     const name = userData.user_metadata?.full_name || userData.email.split('@')[0];
     const avatar = userData.user_metadata?.avatar_url || null;
 
-    // sbGet already returns parsed JSON — no .json() needed
-    const existing = await sbGet('users', 'id=eq.' + userData.id);
+    // Look up by Google ID first, then fall back to email (merge accounts)
+    let existing = await sbGet('users', 'id=eq.' + userData.id);
 
     if (!existing || !existing.length) {
-      // New user — insert into our table
-      await sbUpsert('users', {
-        id: userData.id,
-        email: userData.email,
-        name: name,
-        pass_hash: 'google_oauth',
-        avatar: avatar,
-        instagram: null,
-        join_date: new Date().toISOString().split('T')[0]
-      });
+      // No account with Google ID — check if account exists with same email
+      const byEmail = await sbGet('users', 'email=eq.' + encodeURIComponent(userData.email));
+      if (byEmail && byEmail.length) {
+        // Email account exists — update it to use Google ID + avatar
+        const old = byEmail[0];
+        await sbUpsert('users', {
+          ...old,
+          id: userData.id,
+          pass_hash: 'google_oauth',
+          avatar: old.avatar || avatar,
+        });
+        // Delete old record with different ID
+        if (old.id !== userData.id) {
+          await sbDelete('users', 'id=eq.' + old.id);
+        }
+        existing = [{ ...old, id: userData.id, avatar: old.avatar || avatar }];
+      } else {
+        // Brand new user
+        const newUser = {
+          id: userData.id,
+          email: userData.email,
+          name: name,
+          pass_hash: 'google_oauth',
+          avatar: avatar,
+          instagram: null,
+          join_date: new Date().toISOString().split('T')[0]
+        };
+        await sbUpsert('users', newUser);
+        existing = [newUser];
+      }
     }
 
-    const userRow = (existing && existing[0]) || {};
+    const userRow = existing[0];
     currentUser = {
       id: userData.id,
       name: userRow.name || name,
