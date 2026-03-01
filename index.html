@@ -420,7 +420,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 
   <!-- SEARCH EVENTS -->
   <div style="padding:0 16px 4px">
-    <input id="ev-search" type="text" placeholder="🔍 Buscar evento o artista..." oninput="filterEventsSearch(this.value)" style="width:100%;padding:11px 16px;background:var(--ink3);border:1px solid var(--line2);color:var(--white);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1px;outline:none;box-sizing:border-box;">
+    <input id="ev-search" type="text" placeholder="🔍 Buscar evento o artista..." oninput="filterEventsSearch(this.value)" autocomplete="off" autocorrect="off" spellcheck="false" style="width:100%;padding:11px 16px;background:var(--ink3);border:1px solid var(--line2);color:var(--white);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1px;outline:none;box-sizing:border-box;">
   </div>
 
   <!-- EVENTS GRID -->
@@ -454,7 +454,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
     </div>
   </div>
   <div style="padding:0 16px 12px">
-    <input id="search-input" type="text" placeholder="🔍 Buscar boliche o bar..." oninput="searchVenues(this.value)" style="width:100%;padding:12px 16px;background:var(--ink3);border:1px solid var(--line2);color:var(--white);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1px;outline:none;box-sizing:border-box;">
+    <input id="search-input" type="text" placeholder="🔍 Buscar boliche o bar..." oninput="searchVenues(this.value)" autocomplete="off" autocorrect="off" spellcheck="false" style="width:100%;padding:12px 16px;background:var(--ink3);border:1px solid var(--line2);color:var(--white);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1px;outline:none;box-sizing:border-box;">
   </div>
   <div class="grid" id="grid"></div>
 </div>
@@ -1720,7 +1720,7 @@ function renderDir(f) {
         <div class="card-foot">
           <div class="card-pr">${v.type==='bar'?'Bar libre':'Entrada'} <b>${v.ticketPrice?'$'+v.ticketPrice.toLocaleString('es-AR'):'gratis'}</b></div>
           <div style="display:flex;gap:4px;align-items:center">
-            <button class="fav-btn${isFav(v.id)?' on':''}" onclick="toggleFav(event,${v.id})" title="Guardar en favoritos">${isFav(v.id)?'❤️':'🤍'}</button>
+            <button class="fav-btn${isFav(v.id)?' on':''}" onclick="toggleFav(event,${v.id})" title="${isFav(v.id)?'Quitar de favoritos':'Guardar'}" style="display:flex;align-items:center;gap:3px;font-size:11px;color:${isFav(v.id)?'var(--gold)':'var(--muted)'};letter-spacing:.5px;font-family:'Montserrat',sans-serif;">${isFav(v.id)?'❤️':'🤍'}<span>${isFav(v.id)?'Guardado':'Guardar'}</span></button>
             <button class="vote-btn${on?' on':''}" onclick="castVote(event,${v.id})">
               <span>${on?'✓':'🙋'}</span><span class="vote-count">${getV(v.id)}</span>
             </button>
