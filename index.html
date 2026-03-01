@@ -1530,6 +1530,39 @@ async function castVote(e, id) {
   refreshModalVote(id);
 }
 
+// ── RENDER VOTERS PREVIEW (avatars + click to see all) ──
+function renderVotersPreview(venueId, voters) {
+  const el = document.getElementById('voters-preview-' + venueId);
+  if (!el) return;
+  if (!voters || !voters.length) { el.innerHTML = ''; return; }
+
+  // Stack of avatars
+  let avatarsHtml = '<div style="display:flex;align-items:center;">';
+  voters.slice(0,5).forEach(function(u, i) {
+    const av = u.avatar
+      ? '<img src="' + u.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+      : u.name.charAt(0).toUpperCase();
+    avatarsHtml += '<div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--ink);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid var(--ink2);margin-left:' + (i===0?'0':'-8px') + ';flex-shrink:0;">' + av + '</div>';
+  });
+  if (voters.length > 5) {
+    avatarsHtml += '<div style="width:28px;height:28px;border-radius:50%;background:var(--ink3);color:var(--muted);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink2);margin-left:-8px;">+' + (voters.length-5) + '</div>';
+  }
+  avatarsHtml += '</div>';
+
+  // First person name + instagram
+  const first = voters[0];
+  const firstIg = first.instagram ? '@' + first.instagram : first.name;
+  const moreText = voters.length > 1 ? ' y ' + (voters.length - 1) + ' más' : '';
+
+  el.innerHTML = '<button onclick="openVotersList(' + venueId + ')" style="display:flex;align-items:center;gap:10px;background:var(--ink3);border:1px solid var(--line2);padding:8px 12px;cursor:pointer;width:100%;text-align:left;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--line2)'">'
+    + avatarsHtml
+    + '<div style="flex:1;min-width:0;">'
+    + '<div style="font-size:11px;color:var(--white);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + firstIg + moreText + '</div>'
+    + '<div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:2px;">VAN ESTA SEMANA · TOCAR PARA VER TODOS</div>'
+    + '</div>'
+    + '</button>';
+}
+
 function refreshModalVote(id) {
   const btn = document.getElementById('mvote-' + id);
   if (!btn) return;
@@ -1539,26 +1572,11 @@ function refreshModalVote(id) {
   const sub = document.getElementById('mvote-sub-' + id);
   if (sub) sub.textContent = getV(id) + ' persona' + (getV(id)!==1?'s':'') + ' quieren ir · Solo podés votar 1 lugar';
 
-  // Refresh the "Van esta noche" section
+  // Refresh voter preview
   getVotersForVenue(id).then(function(voters) {
-    voterCache[id] = voters; // update cache
-    renderRanking();         // update ranking with fresh avatars
-
-    const sec = document.getElementById('voters-section-' + id);
-    const el  = document.getElementById('voters-' + id);
-    if (!el) return;
-
-    if (!voters.length) {
-      el.innerHTML = '';
-      if (sec) sec.style.display = 'none';
-      return;
-    }
-    if (sec) sec.style.display = '';
-    el.innerHTML = voters.map(function(u) {
-      const av = u.avatar ? '<img src="' + u.avatar + '" alt="">' : u.name.charAt(0).toUpperCase();
-      const ig = u.instagram ? '<a href="https://instagram.com/' + u.instagram + '" target="_blank" class="voter-chip-ig">@' + u.instagram + '</a>' : '';
-      return '<div class="voter-chip"><div class="voter-chip-av">' + av + '</div><span class="voter-chip-name">' + u.name + '</span>' + ig + '</div>';
-    }).join('');
+    voterCache[id] = voters;
+    renderVotersPreview(id, voters);
+    renderRanking();
   });
 }
 
@@ -1876,83 +1894,76 @@ function highlightSide(id) {
 function openModal(id) {
   const v = venues.find(x => x.id === id); if(!v) return;
   const on = isMyVote(v.id);
-  document.getElementById('modalInner').innerHTML = `
-    <div class="modal-img-wrap">
-      <div class="modal-img-bg" style="background:${v.bg}">${v.emoji}</div>
-      <div class="modal-img-grad"></div>
-    </div>
-    <div class="modal-body">
-      <div class="modal-zone">${v.zone} · ${v.type==='bar'?'Bar Nocturno':'Boliche'}</div>
-      <div class="modal-name">${v.name}</div>
-      <div class="modal-desc">${v.desc}</div>
+  const evHtml = v.events.map(function(e) {
+    return '<div class="ev-item' + (e.hoy?' hoy-ev':'') + '">'
+      + '<div style="text-align:center;min-width:38px"><div class="ev-d">' + e.d + '</div><div class="ev-m">' + e.m + '</div></div>'
+      + '<div style="flex:1"><div class="ev-n">' + e.name + (e.hoy?'<span class="hoy-tag">HOY</span>':'') + '</div><div class="ev-dj">' + e.dj + '</div></div>'
+      + '</div>';
+  }).join('');
 
-      <div class="vote-section">
-        <div class="vs-info">
-          <div class="vs-ttl">¿Vas esta semana?</div>
-          <div class="vs-sub" id="mvote-sub-${v.id}">${getV(v.id)} persona${getV(v.id)!==1?'s':''} quieren ir · Solo podés votar 1 lugar</div>
-          <div class="voters-label" id="voters-label-${v.id}" style="display:none">Van esta noche 👇</div>
-          <div class="voters-row" id="voters-${v.id}"></div>
-        </div>
-        <button id="mvote-${v.id}" class="vote-btn-big${on?' on':''}" onclick="castVote(event,${v.id})">
-          <span class="vb-icon">${on?'✓':'🙋'}</span>
-          <span class="vb-n">${getV(v.id)}</span>
-          <span class="vb-lbl">${on?'Tu voto':'Voy aquí'}</span>
-        </button>
-      </div>
+  const ticketHtml = v.ticketUrl ? (
+    '<div class="msec">'
+    + '<div class="msec-ttl">Entradas</div>'
+    + '<a class="btn-ticket" href="' + (v.ticketEventUrl || v.ticketUrl) + '" target="_blank" rel="noopener">🎟 '
+    + (v.ticketEventUrl ? 'Comprar entrada · ' + ((v.events.find(function(e){return e.hoy;})||{}).name || 'Evento esta semana') : 'Ver entradas en Passline')
+    + '</a>'
+    + '<div class="ticket-note">🔒 Serás redirigido a Passline · Comprá tu entrada oficial ahí</div>'
+    + '</div>'
+  ) : '';
 
-      <div class="msec">
-        <div class="msec-ttl">Información</div>
-        <div class="mrow"><span class="mrow-icon">📍</span><div><span class="mrow-label">Dirección</span>${v.address}</div></div>
-        <div class="mrow"><span class="mrow-icon">🕐</span><div><span class="mrow-label">Horario</span>${v.hours}</div></div>
-        <div class="mrow"><span class="mrow-icon">💳</span><div><span class="mrow-label">Precios</span>${v.price}</div></div>
-      </div>
+  document.getElementById('modalInner').innerHTML =
+    '<div class="modal-img-wrap">'
+    + '<div class="modal-img-bg" style="background:' + v.bg + '">' + v.emoji + '</div>'
+    + '<div class="modal-img-grad"></div>'
+    + '</div>'
+    + '<div class="modal-body">'
+    + '<div class="modal-zone">' + v.zone + ' · ' + (v.type==='bar'?'Bar Nocturno':'Boliche') + '</div>'
+    + '<div class="modal-name">' + v.name + '</div>'
+    + '<div class="modal-desc">' + v.desc + '</div>'
 
-      <div class="msec">
-        <div class="msec-ttl">Próximos eventos</div>
-        ${v.events.map(e=>`<div class="ev-item${e.hoy?' hoy-ev':''}">
-          <div style="text-align:center;min-width:38px"><div class="ev-d">${e.d}</div><div class="ev-m">${e.m}</div></div>
-          <div style="flex:1"><div class="ev-n">${e.name}${e.hoy?'<span class="hoy-tag">HOY</span>':''}</div><div class="ev-dj">${e.dj}</div></div>
-        </div>`).join('')}
-      </div>
+    + '<div class="vote-section">'
+    + '<div class="vs-info">'
+    + '<div class="vs-ttl">¿Vas esta semana?</div>'
+    + '<div class="vs-sub" id="mvote-sub-' + v.id + '">' + getV(v.id) + ' persona' + (getV(v.id)!==1?'s':'') + ' quieren ir · Solo podés votar 1 lugar</div>'
+    // Voters preview — clickable button showing avatars + count
+    + '<div id="voters-preview-' + v.id + '" style="margin-top:10px"></div>'
+    + '</div>'
+    + '<button id="mvote-' + v.id + '" class="vote-btn-big' + (on?' on':'') + '" onclick="castVote(event,' + v.id + ')">'
+    + '<span class="vb-icon">' + (on?'✓':'🙋') + '</span>'
+    + '<span class="vb-n">' + getV(v.id) + '</span>'
+    + '<span class="vb-lbl">' + (on?'Tu voto':'Voy aquí') + '</span>'
+    + '</button>'
+    + '</div>'
 
-      <div class="msec">
-        <div class="msec-ttl">Ubicación</div>
-        <div class="mini-map-wrap" id="mini-map-${v.id}"></div>
-        <button class="btn-maps" onclick="window.open('${v.maps}','_blank')">Abrir en Google Maps →</button>
-      </div>
+    + '<div class="msec">'
+    + '<div class="msec-ttl">Información</div>'
+    + '<div class="mrow"><span class="mrow-icon">📍</span><div><span class="mrow-label">Dirección</span>' + v.address + '</div></div>'
+    + '<div class="mrow"><span class="mrow-icon">🕐</span><div><span class="mrow-label">Horario</span>' + v.hours + '</div></div>'
+    + '<div class="mrow"><span class="mrow-icon">💳</span><div><span class="mrow-label">Precios</span>' + v.price + '</div></div>'
+    + '</div>'
 
-      ${v.ticketUrl ? `<div class="msec">
-        <div class="msec-ttl">Entradas</div>
-        <a class="btn-ticket" href="${v.ticketEventUrl || v.ticketUrl}" target="_blank" rel="noopener">🎟 ${v.ticketEventUrl ? "Comprar entrada · " + (v.events.find(e=>e.hoy)?.name || "Evento esta semana") : "Ver entradas en Passline"}</a>
-        <div class="ticket-note">🔒 Serás redirigido a Passline · Comprá tu entrada oficial ahí</div>
-      </div>` : ''}
-      <div class="msec" id="voters-section-${v.id}" style="display:none">
-        <div class="msec-ttl" style="display:flex;align-items:center;justify-content:space-between;">
-          Van esta noche 🔥
-          <button onclick="openVotersList(${v.id})" style="background:none;border:1px solid var(--line2);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1px;padding:4px 10px;cursor:pointer;">VER TODOS →</button>
-        </div>
-        <div class="voters-row" id="voters-${v.id}"></div>
-      </div>
-    </div>`;
+    + '<div class="msec"><div class="msec-ttl">Próximos eventos</div>' + evHtml + '</div>'
+
+    + '<div class="msec">'
+    + '<div class="msec-ttl">Ubicación</div>'
+    + '<div class="mini-map-wrap" id="mini-map-' + v.id + '"></div>'
+    + '<button class="btn-maps" onclick="window.open('' + v.maps + '','_blank')">Abrir en Google Maps →</button>'
+    + '</div>'
+
+    + ticketHtml
+    + '</div>';
 
   document.getElementById('modalOv').classList.add('on');
   document.body.style.overflow = 'hidden';
 
-  // Load voters
+  // Load voters into preview
   getVotersForVenue(v.id).then(function(voters) {
     voterCache[v.id] = voters;
-    const el = document.getElementById('voters-' + v.id);
-    const sec = document.getElementById('voters-section-' + v.id);
-    if (!el) return;
-    if (!voters.length) { el.innerHTML = ''; if(sec) sec.style.display='none'; return; }
-    if(sec) sec.style.display='';
-    el.innerHTML = voters.map(function(u) {
-      const av = u.avatar ? '<img src="' + u.avatar + '" alt="">' : u.name.charAt(0).toUpperCase();
-      const ig = u.instagram ? '<a href="https://instagram.com/' + u.instagram + '" target="_blank" class="voter-chip-ig">@' + u.instagram + '</a>' : '';
-      return '<div class="voter-chip"><div class="voter-chip-av">' + av + '</div><span class="voter-chip-name">' + u.name + '</span>' + ig + '</div>';
-    }).join('');
+    renderVotersPreview(v.id, voters);
     renderRanking();
   });
+
+
 
   setTimeout(() => {
     try {
