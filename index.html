@@ -9,22 +9,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root {
-  --ink: #0c0c0e;
-  --ink2: #141416;
-  --ink3: #1c1c1f;
-  --ink4: #242428;
-  --line: #2a2a2e;
-  --line2: #333338;
-  --muted: #5a5a62;
-  --mid: #888890;
-  --pale: #b8b8c0;
-  --cream: #e8e6e0;
-  --white: #f4f2ec;
-  --gold: #b8975a;
-  --gold2: #d4b06e;
-  --gold3: #ead4a0;
-  --red: #c0392b;
-  --green: #27ae60;
+  --ink: #080608;
+  --ink2: #100e12;
+  --ink3: #181520;
+  --ink4: #201c2a;
+  --line: #2a2535;
+  --line2: #352f42;
+  --muted: #5a5268;
+  --mid: #8a80a0;
+  --pale: #c0b8d4;
+  --cream: #ede8f0;
+  --white: #f5f0f8;
+  --gold: #c4527a;
+  --gold2: #e06090;
+  --gold3: #f0a0c0;
+  --accent: #7c3aed;
+  --accent2: #a855f7;
+  --red: #e53e6b;
+  --green: #22c55e;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;background:var(--ink);color:var(--white);font-family:'Montserrat',sans-serif;overflow-x:hidden;}
@@ -56,8 +58,8 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 
 /* ── TONIGHT ── */
 .tonight-hdr{padding:28px 20px 16px;display:flex;align-items:flex-end;justify-content:space-between;}
-.tonight-h{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;letter-spacing:2px;line-height:.9;}
-.tonight-h em{color:var(--gold);font-style:italic;}
+.tonight-h{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;letter-spacing:2px;line-height:.9;color:var(--white);}
+.tonight-h em{color:var(--gold);font-style:italic;background:linear-gradient(90deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .tonight-meta{text-align:right;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);line-height:1.8;}
 .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.4s infinite;margin-right:5px;vertical-align:middle;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
@@ -91,7 +93,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 /* ── DIRECTORY ── */
 .dir-hero{padding:36px 20px 20px;text-align:center;}
 .dir-h{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,14vw,100px);font-weight:300;line-height:.88;letter-spacing:1px;}
-.dir-h em{color:var(--gold);font-style:italic;display:block;}
+.dir-h em{background:linear-gradient(90deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic;display:block;}
 .dir-sub{margin-top:12px;font-size:11px;color:var(--muted);letter-spacing:1px;}
 .dir-live{display:flex;align-items:center;justify-content:center;gap:6px;margin:14px 0;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
 
@@ -306,11 +308,15 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .hdr-avatar img{width:100%;height:100%;object-fit:cover;}
 
 /* VOTERS AVATARS */
-.voters-row{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;}
-.voter-chip{display:flex;align-items:center;gap:6px;padding:4px 8px 4px 4px;border:1px solid var(--line2);background:var(--ink3);font-size:11px;color:var(--pale);}
-.voter-chip-av{width:22px;height:22px;border-radius:50%;border:1px solid var(--line2);background:var(--ink4);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;overflow:hidden;}
+.voters-row{display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.voters-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:12px;margin-bottom:4px;}
+.voter-chip{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 5px;border:1px solid var(--line2);background:var(--ink3);font-size:11px;color:var(--pale);border-radius:20px;transition:border-color .2s;}
+.voter-chip:hover{border-color:var(--gold);}
+.voter-chip-av{width:24px;height:24px;border-radius:50%;border:1px solid var(--line2);background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;overflow:hidden;color:var(--white);}
 .voter-chip-av img{width:100%;height:100%;object-fit:cover;}
-.voter-chip-ig{font-size:10px;color:#e1306c;}
+.voter-chip-name{font-weight:500;color:var(--white);}
+.voter-chip-ig{font-size:10px;color:var(--gold2);text-decoration:none;}
+.voter-chip-ig:hover{color:var(--gold3);text-decoration:underline;}
 
 /* TOAST */
 .toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink3);border:1px solid var(--gold);color:var(--gold);font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 18px;opacity:0;transition:all .3s;z-index:800;white-space:nowrap;}
@@ -336,7 +342,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 <!-- TONIGHT -->
 <div class="view on" id="tonight-view">
   <div class="tonight-hdr">
-    <div class="tonight-h">ESTA<em>NOCHE</em></div>
+    <div class="tonight-h">TO<em>NIGHT</em></div>
     <div class="tonight-meta" id="tonight-date"></div>
   </div>
   <div class="tonight-rail" id="tonight-rail"></div>
@@ -1169,8 +1175,8 @@ function refreshModalVote(id) {
     if (!voters.length) { el.innerHTML = ''; return; }
     el.innerHTML = voters.map(u => {
       const av = u.avatar ? `<img src="${u.avatar}" alt="">` : u.name.charAt(0).toUpperCase();
-      const ig = u.instagram ? `<span class="voter-chip-ig">@${u.instagram}</span>` : '';
-      return `<div class="voter-chip"><div class="voter-chip-av">${av}</div>${u.name}${ig}</div>`;
+      const ig = u.instagram ? `<a href="https://instagram.com/${u.instagram}" target="_blank" class="voter-chip-ig">@${u.instagram}</a>` : '';
+      return `<div class="voter-chip"><div class="voter-chip-av">${av}</div><span class="voter-chip-name">${u.name}</span>${ig}</div>`;
     }).join('');
   });
 }
@@ -1343,6 +1349,7 @@ function openModal(id) {
         <div class="vs-info">
           <div class="vs-ttl">¿Vas esta semana?</div>
           <div class="vs-sub" id="mvote-sub-${v.id}">${getV(v.id)} persona${getV(v.id)!==1?'s':''} quieren ir · Solo podés votar 1 lugar</div>
+          <div class="voters-label" id="voters-label-${v.id}" style="display:none">Van esta noche 👇</div>
           <div class="voters-row" id="voters-${v.id}"></div>
         </div>
         <button id="mvote-${v.id}" class="vote-btn-big${on?' on':''}" onclick="castVote(event,${v.id})">
@@ -1378,6 +1385,10 @@ function openModal(id) {
         <button class="btn-ticket" onclick="openMp(${v.id})">🎟 Sacar Entrada · Desde $${(v.ticketPrice||0).toLocaleString('es-AR')}</button>
         <div class="ticket-note">🔒 Pago seguro vía MercadoPago · Entrada digital al instante</div>
       </div>` : ''}
+      <div class="msec" id="voters-section-${v.id}" style="display:none">
+        <div class="msec-ttl">Van esta noche 🔥</div>
+        <div class="voters-row" id="voters-${v.id}"></div>
+      </div>
     </div>`;
 
   document.getElementById('modalOv').classList.add('on');
@@ -1386,12 +1397,14 @@ function openModal(id) {
   // Load voters
   getVotersForVenue(v.id).then(voters => {
     const el = document.getElementById('voters-' + v.id);
+    const sec = document.getElementById('voters-section-' + v.id);
     if (!el) return;
-    if (!voters.length) { el.innerHTML = ''; return; }
+    if (!voters.length) { el.innerHTML = ''; if(sec) sec.style.display='none'; return; }
+    if(sec) sec.style.display='';
     el.innerHTML = voters.map(u => {
       const av = u.avatar ? `<img src="${u.avatar}" alt="">` : u.name.charAt(0).toUpperCase();
-      const ig = u.instagram ? `<span class="voter-chip-ig">@${u.instagram}</span>` : '';
-      return `<div class="voter-chip"><div class="voter-chip-av">${av}</div>${u.name}${ig}</div>`;
+      const ig = u.instagram ? `<a href="https://instagram.com/${u.instagram}" target="_blank" class="voter-chip-ig">@${u.instagram}</a>` : '';
+      return `<div class="voter-chip"><div class="voter-chip-av">${av}</div><span class="voter-chip-name">${u.name}</span>${ig}</div>`;
     }).join('');
   });
 
