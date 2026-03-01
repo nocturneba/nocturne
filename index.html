@@ -2753,7 +2753,7 @@ async function doRegister() {
   if (!email || !email.includes('@')) { errEl.textContent='Email inválido.'; errEl.classList.add('on'); return; }
   if (pass.length < 6) { errEl.textContent='La contraseña debe tener al menos 6 caracteres.'; errEl.classList.add('on'); return; }
 
-  // Check Supabase directly (not just local cache) to catch Google accounts too
+  // Validar email duplicado
   const existing = await sbGet('users', 'email=eq.' + encodeURIComponent(email));
   if (existing && existing.length) {
     const acc = existing[0];
@@ -2766,12 +2766,23 @@ async function doRegister() {
     return;
   }
 
+  // Validar Instagram duplicado (case-insensitive)
+  if (ig) {
+    const igLower = ig.toLowerCase();
+    const existingIg = await sbGet('users', 'instagram=eq.' + encodeURIComponent(igLower));
+    if (existingIg && existingIg.length) {
+      errEl.textContent = 'Ya existe una cuenta con ese @instagram.';
+      errEl.classList.add('on');
+      return;
+    }
+  }
+
   const user = {
     id: Date.now().toString(36),
     name, email,
     pass_hash: hashPass(pass),
     avatar: pendingAvatarBase64 || null,
-    instagram: ig || null,
+    instagram: ig ? ig.toLowerCase() : null,
     join_date: new Date().toLocaleDateString('es-AR', {month:'short', year:'numeric'})
   };
   await sbUpsert('users', user);
@@ -2806,7 +2817,7 @@ async function doLogin() {
 
   if (isIg) {
     // Find by instagram handle
-    user = Object.values(users).find(u => u.instagram && u.instagram.toLowerCase() === igHandle);
+    user = Object.values(users).find(u => u.instagram && u.instagram.toLowerCase() === igHandle.toLowerCase());
     if (!user) { errEl.textContent='No existe una cuenta con ese @instagram.'; errEl.classList.add('on'); return; }
   } else {
     user = users[identifier];
