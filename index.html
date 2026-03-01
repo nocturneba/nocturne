@@ -2549,11 +2549,12 @@ async function openVotersList(venueId) {
       var youSub = document.createElement('div');
       youSub.style.cssText = 'font-size:10px;color:var(--gold);margin-top:2px;cursor:pointer;';
       youSub.textContent = 'Iniciá sesión para mostrar tu perfil →';
-      youSub.onclick = function(){
-        // Guardar venue para reabrir después del login
-        localStorage.setItem('nocheba-pending-venue', venueId);
+      youSub.setAttribute('data-venue', String(venueId));
+      youSub.onclick = function(ev){
+        var vid = ev.currentTarget.getAttribute('data-venue');
+        localStorage.setItem('nocheba-pending-venue', vid);
         closeVotersList();
-        setTimeout(showAuth, 300);
+        setTimeout(showAuth, 400);
       };
       youInfo.appendChild(youName); youInfo.appendChild(youSub);
       youRow.appendChild(youAv); youRow.appendChild(youInfo);
@@ -2656,66 +2657,55 @@ async function saveUsers(users) {
   // No-op: users saved individually via doRegister/saveEditProfile
 }
 async function loadCurrentUser() {
+  // 1. Cargar sesión desde localStorage INMEDIATAMENTE — no esperar red
   try {
     const s = localStorage.getItem('nocheba-session');
-    if (!s) return;
-    currentUser = JSON.parse(s);
+    if (s) currentUser = JSON.parse(s);
+  } catch(e) { currentUser = null; return; }
 
+  if (!currentUser) return;
+
+  // 2. Verificar/renovar token en background (no bloquea el render)
+  refreshTokenSilent();
+}
+
+async function refreshTokenSilent() {
+  try {
     const token = localStorage.getItem('nocheba-token');
-    if (!token) return;
+    if (!token) return; // sin token, igual usamos la sesión local
 
-    // Check if token is still valid
+    // Verificar token
     const res = await fetch(SB_URL + '/auth/v1/user', {
       headers: { 'Authorization': 'Bearer ' + token, 'apikey': SB_KEY }
     });
 
-    if (res.ok) return; // All good, session valid
+    if (res.ok) return; // token válido
 
-    // Token expired — try to refresh automatically
+    // Token expirado — intentar refresh
     const refreshToken = localStorage.getItem('nocheba-refresh');
-    if (!refreshToken) {
-      currentUser = null;
-      localStorage.removeItem('nocheba-session');
-      localStorage.removeItem('nocheba-token');
-      return;
-    }
+    if (!refreshToken) return; // sin refresh token, mantener sesión local igual
 
-    // Use refresh token to get new access token
     const refreshRes = await fetch(SB_URL + '/auth/v1/token?grant_type=refresh_token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
       body: JSON.stringify({ refresh_token: refreshToken })
     });
 
-    if (!refreshRes.ok) {
-      // Refresh also failed — clear everything
-      currentUser = null;
-      localStorage.removeItem('nocheba-session');
-      localStorage.removeItem('nocheba-token');
-      localStorage.removeItem('nocheba-refresh');
-      return;
-    }
+    if (!refreshRes.ok) return; // refresh falló, mantener sesión local igual
 
     const newTokens = await refreshRes.json();
-    // Save new tokens
     localStorage.setItem('nocheba-token', newTokens.access_token);
     if (newTokens.refresh_token) localStorage.setItem('nocheba-refresh', newTokens.refresh_token);
 
-    // Re-fetch user data with new token
-    const userRes = await fetch(SB_URL + '/auth/v1/user', {
-      headers: { 'Authorization': 'Bearer ' + newTokens.access_token, 'apikey': SB_KEY }
-    });
-    if (userRes.ok) {
-      const userData = await userRes.json();
-      // Refresh currentUser with latest data from our users table
-      const dbUser = await sbGet('users', 'id=eq.' + userData.id);
-      if (dbUser && dbUser[0]) {
-        const u = dbUser[0];
-        currentUser = { id: u.id, name: u.name, email: u.email, avatar: u.avatar, instagram: u.instagram, joinDate: u.join_date };
-        localStorage.setItem('nocheba-session', JSON.stringify(currentUser));
-      }
+    // Actualizar datos del usuario desde DB
+    const dbUser = await sbGet('users', 'id=eq.' + currentUser.id);
+    if (dbUser && dbUser[0]) {
+      const u = dbUser[0];
+      currentUser = { id: u.id, name: u.name, email: u.email, avatar: u.avatar, instagram: u.instagram, joinDate: u.join_date };
+      localStorage.setItem('nocheba-session', JSON.stringify(currentUser));
+      updateHeader();
     }
-  } catch(e) { currentUser = null; }
+  } catch(e) {} // silencioso — nunca limpiar sesión por error de red
 }
 async function saveSession() {
   try {
