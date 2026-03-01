@@ -141,9 +141,10 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .card-foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line);}
 .card-pr{font-size:12px;color:var(--mid);}
 .card-pr b{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--gold2);font-weight:500;}
-.vote-btn{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line2);background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.vote-btn{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line2);background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent;}
 .vote-btn:hover{border-color:var(--gold);color:var(--gold);}
-.vote-btn.on{border-color:var(--gold);background:rgba(184,151,90,.1);color:var(--gold);}
+.vote-btn:active{transform:scale(0.93);}
+.vote-btn.on{border-color:var(--gold);background:rgba(184,151,90,.12);color:var(--gold);}
 .vote-count{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;line-height:1;}
 
 /* ── MAP ── */
@@ -205,9 +206,10 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .vs-info{}
 .vs-ttl{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;}
 .vs-sub{font-size:11px;color:var(--muted);margin-top:2px;}
-.vote-btn-big{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 18px;border:1px solid var(--line2);background:none;color:var(--muted);font-family:'Montserrat',sans-serif;cursor:pointer;transition:all .22s;}
+.vote-btn-big{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 18px;border:1px solid var(--line2);background:none;color:var(--muted);font-family:'Montserrat',sans-serif;cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent;}
 .vote-btn-big:hover{border-color:var(--gold);color:var(--gold);}
-.vote-btn-big.on{border-color:var(--gold);background:rgba(184,151,90,.1);color:var(--gold);}
+.vote-btn-big:active{transform:scale(0.93);}
+.vote-btn-big.on{border-color:var(--gold);background:rgba(184,151,90,.12);color:var(--gold);}
 .vb-icon{font-size:20px;}
 .vb-n{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;line-height:1;}
 .vb-lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;}
@@ -1646,7 +1648,7 @@ async function saveState() {
 function getV(id) { return votes[id] || 0; }
 function isMyVote(id) { return myVote === id; }
 
-async function castVote(e, id) {
+function castVote(e, id) {
   e.stopPropagation();
   if (!currentUser) {
     localStorage.setItem('nocheba-pending-vote', id);
@@ -1658,34 +1660,40 @@ async function castVote(e, id) {
   var wasMyVote = isMyVote(id);
   var prevVote = myVote;
 
-  // ── INSTANT VISUAL UPDATE ──
+  // ── INSTANT UPDATE — sin await, sin esperas ──
   if (wasMyVote) {
     votes[id] = Math.max(0, (votes[id] || 1) - 1);
     myVote = null;
-  } else {
-    if (prevVote !== null) votes[prevVote] = Math.max(0, (votes[prevVote] || 1) - 1);
-    myVote = id;
-    votes[id] = (votes[id] || 0) + 1;
-  }
-  delete voterCache[id];
-  if (prevVote !== null) delete voterCache[prevVote];
-  refreshModalVote(id);
-  if (prevVote !== null && prevVote !== id) refreshModalVote(prevVote);
-  renderAllUI();
-
-  // ── SAVE TO SUPABASE IN BACKGROUND ──
-  if (wasMyVote) {
-    await sbDelete('user_votes', 'user_id=eq.' + currentUser.id);
-    await sbUpsert('votes', { venue_id: id, count: votes[id] });
     showToast('Voto eliminado');
   } else {
-    if (prevVote !== null) await sbUpsert('votes', { venue_id: prevVote, count: votes[prevVote] });
-    await sbUpsert('votes', { venue_id: id, count: votes[id] });
-    await sbUpsert('user_votes', { user_id: currentUser.id, venue_id: id, updated_at: new Date().toISOString() });
+    if (prevVote !== null) {
+      votes[prevVote] = Math.max(0, (votes[prevVote] || 1) - 1);
+      delete voterCache[prevVote];
+    }
+    myVote = id;
+    votes[id] = (votes[id] || 0) + 1;
     var vname = (venues.find(function(v){ return v.id===id; })||{}).name || '';
     showToast(prevVote !== null ? 'Voto cambiado a ' + vname + ' 🎉' : '¡Vas a ir a ' + vname + '! 🎉');
   }
-  await saveState();
+  delete voterCache[id];
+
+  // ── RENDER INMEDIATO ──
+  renderAllUI();
+  refreshModalVote(id);
+  if (prevVote !== null && prevVote !== id) refreshModalVote(prevVote);
+
+  // ── SUPABASE EN BACKGROUND (fire & forget) ──
+  try { localStorage.setItem('nocheba-myvote', JSON.stringify(myVote)); } catch(e2) {}
+  (function(uid, vid, prev, was, vc) {
+    if (was) {
+      sbDelete('user_votes', 'user_id=eq.' + uid);
+      sbUpsert('votes', { venue_id: vid, count: vc[vid] || 0 });
+    } else {
+      if (prev !== null) sbUpsert('votes', { venue_id: prev, count: vc[prev] || 0 });
+      sbUpsert('votes', { venue_id: vid, count: vc[vid] || 0 });
+      sbUpsert('user_votes', { user_id: uid, venue_id: vid, updated_at: new Date().toISOString() });
+    }
+  })(currentUser.id, id, prevVote, wasMyVote, votes);
 }
 
 // ── RENDER VOTERS PREVIEW (avatars + click to see all) ──
