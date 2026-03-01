@@ -2453,30 +2453,21 @@ async function sendChat() {
   chatHistory.push({ role: 'user', content: text });
   showTyping();
 
-  // Build context from current venues/events data
-  const topVenues = venues.slice(0,15).map(v =>
-    `${v.name} (${v.zone}, ${v.music.join('/')}, entrada desde $${v.ticketPrice||'gratis'}, horario: ${v.hours})`
-  ).join('
-');
+  // Build context
+  const topVenues = venues.slice(0,15).map(function(v) {
+    return v.name + ' (' + v.zone + ', ' + v.music.join('/') + ', desde $' + (v.ticketPrice||'gratis') + ', ' + v.hours + ')';
+  }).join(' | ');
 
-  const todayEvents = events.filter(e => e.hoy).map(e =>
-    `${e.name} en ${e.venueName} - ${e.dj} - $${e.price.toLocaleString('es-AR')}`
-  ).join('
-');
+  const todayEvents = events.filter(function(e){ return e.hoy; }).map(function(e) {
+    return e.name + ' en ' + e.venueName + ' - ' + e.dj + ' - $' + e.price.toLocaleString('es-AR');
+  }).join(' | ');
 
-  const systemPrompt = `Sos Nocturne AI, el asistente de Nocturne — una app de vida nocturna de Buenos Aires.
-Tu trabajo es recomendar lugares y eventos basándote en lo que pide el usuario.
-Respondé en español, de forma breve y directa (máximo 3-4 líneas). Usá emojis con moderación.
-Siempre terminá con una recomendación concreta de 1-2 lugares o eventos.
-
-LUGARES DISPONIBLES HOY:
-${topVenues}
-
-EVENTOS DE HOY:
-${todayEvents}
-
-Si el usuario pregunta sobre precios, horarios o música, usá esa info.
-Si no tenés info exacta, dalo por aproximado y sugerí que vean el directorio completo.`;
+  const systemPrompt = 'Sos Nocturne AI, asistente de Nocturne, app de vida nocturna de Buenos Aires. ' +
+    'Recomendá lugares y eventos segun lo que pide el usuario. ' +
+    'Respondé en español, breve (max 3-4 lineas), con emojis moderados. ' +
+    'Terminá siempre con 1-2 recomendaciones concretas. ' +
+    'LUGARES: ' + topVenues + '. ' +
+    'EVENTOS HOY: ' + (todayEvents || 'ninguno cargado') + '.';
 
   try {
     const res = await fetch(CHAT_API, {
