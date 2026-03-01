@@ -513,6 +513,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
   <div class="filters">
     <div class="filter-row">
       <button class="fb on" onclick="filter('todos',this)">Todos</button>
+      <button class="fb gold-filter" onclick="filter('top10',this)">⭐ Top 10</button>
       <button class="fb" onclick="filter('boliche',this)">Boliches</button>
       <button class="fb" onclick="filter('bar',this)">Bares</button>
       <button class="fb" onclick="filter('electronica',this)">Electrónica</button>
@@ -579,11 +580,11 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
       </div>
     </a>
 
-        <a id="ceml" href="#" style="display:flex;align-items:center;gap:14px;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--white)">
+        <a href="mai&#108;to&#58;nocturnearg&#64;gmail&#46;com" style="display:flex;align-items:center;gap:14px;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--white)">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
       <div>
         <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Email</div>
-        <div id="cemlt" style="font-size:14px;color:var(--pale)">...</div>
+        <div style="font-size:14px;color:var(--pale)">nocturnearg&#64;gmail&#46;com</div>
       </div>
     </a>
 
@@ -592,13 +593,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
       <div style="font-size:13px;color:var(--pale);line-height:1.8;margin-bottom:8px">Nocturne es la plataforma donde <b style="color:var(--white)">miles de personas</b> deciden a dónde ir cada semana en Buenos Aires.</div>
       <div style="font-size:13px;color:var(--pale);line-height:1.8;margin-bottom:8px">Si tenés un boliche, bar o evento, aparecer acá significa visibilidad directa con tu público objetivo — la gente que ya está buscando dónde salir.</div>
       <div style="font-size:13px;color:var(--pale);line-height:1.8;margin-bottom:28px">Escribinos y te contamos cómo sumarte.</div>
-          <a id="ceml" href="#" style="display:flex;align-items:center;gap:14px;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--white)">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
-      <div>
-        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Email</div>
-        <div id="cemlt" style="font-size:14px;color:var(--pale)">...</div>
-      </div>
-    </a>
+      <a href="mai&#108;to&#58;nocturnearg&#64;gmail&#46;com?subject=Quiero%20aparecer%20en%20Nocturne" style="display:inline-block;border:1px solid var(--gold);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;text-decoration:none;transition:all .2s;margin-right:12px">Escribir →</a>
       <a href="https://instagram.com/nocturne.ba" target="_blank" style="display:inline-block;border:1px solid var(--line2);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;text-decoration:none;transition:all .2s">DM en IG →</a>
     </div>
 
@@ -632,18 +627,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 
   </div>
 </div>
-<script data-cfasync="false">
-(function(){
-  var p1='nocturne',p2='arg',p3=String.fromCharCode(64),p4='gmail',p5='.com';
-  var em=p1+p2+p3+p4+p5;
-  var a=document.getElementById('ceml');
-  var t=document.getElementById('cemlt');
-  var b=document.getElementById('cemlb');
-  if(a)a.href='mail'+'to:'+em;
-  if(t)t.textContent=em;
-  if(b)b.href='mail'+'to:'+em+'?subject=Quiero aparecer en Nocturne&body=Hola!';
-})();
-</script>
+
 
 <!-- MODAL -->
 <div class="modal-ov" id="modalOv" onclick="closeModalOv(event)">
@@ -1979,7 +1963,17 @@ function renderTonight() {
 
 // ── DIRECTORY ──
 function renderDir(f) {
-  let list = f === 'todos' ? venues : venues.filter(v => v.cat.includes(f));
+  let list;
+  if (f === 'todos') {
+    list = venues;
+  } else if (f === 'top10') {
+    // Top 10: manually featured venues first, then fill with most voted
+    const featured = venues.filter(v => v.featured);
+    const byVotes = venues.filter(v => !v.featured).sort((a,b) => getV(b.id)-getV(a.id));
+    list = [...featured, ...byVotes].slice(0, 10);
+  } else {
+    list = venues.filter(v => v.cat.includes(f));
+  }
   if (searchQuery) list = list.filter(v => v.name.toLowerCase().includes(searchQuery) || v.zone.toLowerCase().includes(searchQuery) || v.music.some(m => m.toLowerCase().includes(searchQuery)));
 
   // Sort by proximity + relevance
