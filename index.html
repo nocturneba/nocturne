@@ -1497,8 +1497,10 @@ function isMyVote(id) { return myVote === id; }
 async function castVote(e, id) {
   e.stopPropagation();
   if (!currentUser) {
-    showToast('Creá una cuenta para votar con tu perfil 👤');
-    setTimeout(() => showAuth(), 400);
+    // Save pending vote and trigger Google login
+    localStorage.setItem('nocheba-pending-vote', id);
+    showToast('Iniciá sesión para votar 👤');
+    setTimeout(function(){ doLoginGoogle(); }, 600);
     return;
   }
   if (isMyVote(id)) {
@@ -2075,40 +2077,96 @@ function closeModal() { document.getElementById('modalOv').classList.remove('on'
 async function openVotersList(venueId) {
   const v = venues.find(function(x){ return x.id === venueId; });
   if (!v) return;
-  const voters = await getVotersForVenue(venueId);
-  const count = getV(venueId);
+
+  // Use cache if available, otherwise fetch
+  var voters = voterCache[venueId] || await getVotersForVenue(venueId);
+
+  // Inject current user optimistically
+  if (currentUser && isMyVote(venueId)) {
+    var alreadyIn = voters.find(function(u){ return u.id === currentUser.id; });
+    if (!alreadyIn) voters = [{ id: currentUser.id, name: currentUser.name, avatar: currentUser.avatar, instagram: currentUser.instagram }].concat(voters);
+  }
+
+  const count = voters.length;
   const ov = document.getElementById('votersListOv');
   const inner = document.getElementById('votersListInner');
 
-  let votersHtml = '';
+  // Build panel with createElement — no string HTML issues
+  inner.innerHTML = '';
+
+  // Header
+  var header = document.createElement('div');
+  header.style.cssText = 'padding:20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);flex-shrink:0;';
+  var titleWrap = document.createElement('div');
+  var zone = document.createElement('div');
+  zone.style.cssText = 'font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px';
+  zone.textContent = v.zone + ' · ' + v.emoji;
+  var name = document.createElement('div');
+  name.style.cssText = 'font-size:18px;font-weight:700;color:var(--white)';
+  name.textContent = v.name;
+  var sub = document.createElement('div');
+  sub.style.cssText = 'font-size:11px;color:var(--gold);margin-top:4px';
+  sub.textContent = count + ' persona' + (count!==1?'s':'') + ' van esta semana';
+  titleWrap.appendChild(zone); titleWrap.appendChild(name); titleWrap.appendChild(sub);
+  var closeBtn = document.createElement('button');
+  closeBtn.style.cssText = 'background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px;flex-shrink:0;';
+  closeBtn.textContent = '✕';
+  closeBtn.onclick = closeVotersList;
+  header.appendChild(titleWrap); header.appendChild(closeBtn);
+  inner.appendChild(header);
+
+  // IG list
+  var list = document.createElement('div');
+  list.style.cssText = 'overflow-y:auto;flex:1;padding:12px 16px;';
+
   if (!voters.length) {
-    votersHtml = '<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:13px;">Nadie votó este lugar todavía.</div>';
+    var empty = document.createElement('div');
+    empty.style.cssText = 'text-align:center;color:var(--muted);padding:40px 0;font-size:13px;';
+    empty.textContent = 'Nadie votó este lugar todavía.';
+    list.appendChild(empty);
   } else {
     voters.forEach(function(u) {
-      const av = u.avatar
-        ? '<img src="' + u.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
-        : u.name.charAt(0).toUpperCase();
-      const ig = u.instagram
-        ? '<a href="https://instagram.com/' + u.instagram + '" target="_blank" style="color:var(--gold);font-size:11px;text-decoration:none;">@' + u.instagram + '</a>'
-        : '<span style="color:var(--muted);font-size:11px">Sin Instagram</span>';
-      votersHtml += '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);">'
-        + '<div style="width:40px;height:40px;border-radius:50%;background:var(--gold);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;overflow:hidden;flex-shrink:0;">' + av + '</div>'
-        + '<div style="flex:1;">'
-        + '<div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:3px">' + u.name + '</div>'
-        + ig
-        + '</div></div>';
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);';
+
+      // Avatar
+      var av = document.createElement('div');
+      av.style.cssText = 'width:38px;height:38px;border-radius:50%;background:var(--gold);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;overflow:hidden;flex-shrink:0;';
+      if (u.avatar) { var img = document.createElement('img'); img.src=u.avatar; img.style.cssText='width:100%;height:100%;object-fit:cover;'; av.appendChild(img); }
+      else av.textContent = u.name.charAt(0).toUpperCase();
+
+      // Info
+      var info = document.createElement('div');
+      info.style.flex = '1';
+
+      if (u.instagram) {
+        // Big IG link
+        var igLink = document.createElement('a');
+        igLink.href = 'https://instagram.com/' + u.instagram;
+        igLink.target = '_blank';
+        igLink.style.cssText = 'color:var(--gold);font-size:14px;font-weight:700;text-decoration:none;display:block;';
+        igLink.textContent = '@' + u.instagram;
+        info.appendChild(igLink);
+        var nameSmall = document.createElement('div');
+        nameSmall.style.cssText = 'font-size:10px;color:var(--muted);margin-top:2px;';
+        nameSmall.textContent = u.name;
+        info.appendChild(nameSmall);
+      } else {
+        var nameDiv = document.createElement('div');
+        nameDiv.style.cssText = 'font-size:13px;font-weight:600;color:var(--white);';
+        nameDiv.textContent = u.name;
+        info.appendChild(nameDiv);
+        var noIg = document.createElement('div');
+        noIg.style.cssText = 'font-size:10px;color:var(--muted);margin-top:2px;';
+        noIg.textContent = 'Sin Instagram';
+        info.appendChild(noIg);
+      }
+
+      row.appendChild(av); row.appendChild(info);
+      list.appendChild(row);
     });
   }
-
-  inner.innerHTML = '<div style="padding:20px 20px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);">'
-    + '<div>'
-    + '<div style="font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">' + v.zone + ' · ' + v.emoji + '</div>'
-    + '<div style="font-size:18px;font-weight:700;color:var(--white)">' + v.name + '</div>'
-    + '<div style="font-size:11px;color:var(--gold);margin-top:2px">' + count + ' persona' + (count !== 1 ? 's' : '') + ' van esta semana</div>'
-    + '</div>'
-    + '<button onclick="closeVotersList()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px">✕</button>'
-    + '</div>'
-    + '<div style="overflow-y:auto;flex:1;padding:16px;">' + votersHtml + '</div>';
+  inner.appendChild(list);
 
   ov.classList.add('on');
   document.body.style.overflow = 'hidden';
@@ -2438,6 +2496,23 @@ async function handleOAuthCallback() {
     updateHeader();
     closeAuth();
     showToast('¡Bienvenido ' + currentUser.name.split(' ')[0] + '! 🎉');
+
+    // Execute pending vote if exists
+    const pendingVote = localStorage.getItem('nocheba-pending-vote');
+    if (pendingVote) {
+      localStorage.removeItem('nocheba-pending-vote');
+      const venueId = parseInt(pendingVote);
+      setTimeout(async function() {
+        votes[venueId] = (votes[venueId] || 0) + 1;
+        myVote = venueId;
+        await sbUpsert('votes', { venue_id: venueId, count: votes[venueId] });
+        await sbUpsert('user_votes', { user_id: currentUser.id, venue_id: venueId, updated_at: new Date().toISOString() });
+        await saveState();
+        delete voterCache[venueId];
+        renderAllUI();
+        showToast('¡Vas a ir a ' + (venues.find(function(v){ return v.id===venueId; })||{}).name + '! 🎉');
+      }, 500);
+    }
 
   } catch(e) {
     console.error('OAuth callback error:', e);
