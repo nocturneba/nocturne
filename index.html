@@ -1747,7 +1747,7 @@ async function doLoginGoogle() {
   try {
     showToast('Abriendo Google...');
     const redirectTo = window.location.origin + window.location.pathname;
-    window.location.href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(redirectTo);
+    window.location.href = SB_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(redirectTo);
   } catch(e) {
     showToast('Error al conectar con Google');
   }
@@ -1763,8 +1763,8 @@ async function handleOAuthCallback() {
   if (!accessToken) return;
   // Get user info from Supabase
   try {
-    const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-      headers: { 'Authorization': 'Bearer ' + accessToken, 'apikey': SUPABASE_KEY }
+    const res = await fetch(SB_URL + '/auth/v1/user', {
+      headers: { 'Authorization': 'Bearer ' + accessToken, 'apikey': SB_KEY }
     });
     const userData = await res.json();
     if (userData.email) {
