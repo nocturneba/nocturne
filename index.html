@@ -1598,8 +1598,19 @@ function refreshModalVote(id) {
   const sub = document.getElementById('mvote-sub-' + id);
   if (sub) sub.textContent = getV(id) + ' persona' + (getV(id)!==1?'s':'') + ' quieren ir · Solo podés votar 1 lugar';
 
-  // Refresh voter preview
+  // Refresh voter preview — optimistic update first, then confirm from Supabase
   getVotersForVenue(id).then(function(voters) {
+    // Make sure current user appears if they just voted
+    if (currentUser && isMyVote(id)) {
+      const alreadyIn = voters.find(function(v){ return v.id === currentUser.id; });
+      if (!alreadyIn) {
+        voters = [{ id: currentUser.id, name: currentUser.name, avatar: currentUser.avatar, instagram: currentUser.instagram }].concat(voters);
+      }
+    }
+    // Make sure current user is removed if they just unvoted
+    if (currentUser && !isMyVote(id)) {
+      voters = voters.filter(function(v){ return v.id !== currentUser.id; });
+    }
     voterCache[id] = voters;
     renderVotersPreview(id, voters);
     renderRanking();
