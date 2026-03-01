@@ -2294,18 +2294,34 @@ async function handleOAuthCallback() {
       // No account with Google ID — check if account exists with same email
       const byEmail = await sbGet('users', 'email=eq.' + encodeURIComponent(userData.email));
       if (byEmail && byEmail.length) {
-        // Email account exists — update it to use Google ID + avatar
         const old = byEmail[0];
-        await sbUpsert('users', {
-          ...old,
-          id: userData.id,
-          pass_hash: 'google_oauth',
-          avatar: old.avatar || avatar,
-        });
-        // Delete old record with different ID
+
         if (old.id !== userData.id) {
+          // 1. Create new record with Google ID, copying all profile data
+          await sbUpsert('users', {
+            id: userData.id,
+            email: userData.email,
+            name: old.name || name,
+            pass_hash: 'google_oauth',
+            avatar: old.avatar || avatar,
+            instagram: old.instagram || null,
+            join_date: old.join_date || new Date().toISOString().split('T')[0]
+          });
+
+          // 2. Migrate user_votes from old ID to new Google ID
+          const oldVotes = await sbGet('user_votes', 'user_id=eq.' + old.id);
+          if (oldVotes && oldVotes.length) {
+            // Delete old votes first, then re-insert with new ID
+            await sbDelete('user_votes', 'user_id=eq.' + old.id);
+            for (const v of oldVotes) {
+              await sbUpsert('user_votes', { user_id: userData.id, venue_id: v.venue_id, updated_at: v.updated_at });
+            }
+          }
+
+          // 3. Delete old user record
           await sbDelete('users', 'id=eq.' + old.id);
         }
+
         existing = [{ ...old, id: userData.id, avatar: old.avatar || avatar }];
       } else {
         // Brand new user
