@@ -1593,21 +1593,38 @@ function refreshModalVote(id) {
   const btn = document.getElementById('mvote-' + id);
   if (!btn) return;
   const on = isMyVote(id);
+
+  // Update vote button
   btn.className = 'vote-btn-big' + (on ? ' on' : '');
   btn.innerHTML = '<span class="vb-icon">' + (on ? '✓' : '🙋') + '</span><span class="vb-n">' + getV(id) + '</span><span class="vb-lbl">' + (on ? 'Tu voto' : 'Voy aquí') + '</span>';
   const sub = document.getElementById('mvote-sub-' + id);
   if (sub) sub.textContent = getV(id) + ' persona' + (getV(id)!==1?'s':'') + ' quieren ir · Solo podés votar 1 lugar';
 
-  // Refresh voter preview — optimistic update first, then confirm from Supabase
+  // ── OPTIMISTIC UPDATE — update voter list immediately from cache ──
+  var cached = voterCache[id] ? voterCache[id].slice() : [];
+
+  if (currentUser && on) {
+    // Just voted — add me to list immediately if not there
+    var alreadyIn = cached.find(function(v){ return v.id === currentUser.id; });
+    if (!alreadyIn) {
+      cached = [{ id: currentUser.id, name: currentUser.name, avatar: currentUser.avatar, instagram: currentUser.instagram }].concat(cached);
+    }
+  } else if (currentUser && !on) {
+    // Just unvoted — remove me immediately
+    cached = cached.filter(function(v){ return v.id !== currentUser.id; });
+  }
+  voterCache[id] = cached;
+  renderVotersPreview(id, cached);
+  renderRanking();
+
+  // Then confirm from Supabase in background (updates with real server data)
   getVotersForVenue(id).then(function(voters) {
-    // Make sure current user appears if they just voted
     if (currentUser && isMyVote(id)) {
-      const alreadyIn = voters.find(function(v){ return v.id === currentUser.id; });
+      var alreadyIn = voters.find(function(v){ return v.id === currentUser.id; });
       if (!alreadyIn) {
         voters = [{ id: currentUser.id, name: currentUser.name, avatar: currentUser.avatar, instagram: currentUser.instagram }].concat(voters);
       }
     }
-    // Make sure current user is removed if they just unvoted
     if (currentUser && !isMyVote(id)) {
       voters = voters.filter(function(v){ return v.id !== currentUser.id; });
     }
