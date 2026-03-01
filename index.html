@@ -456,8 +456,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 <header>
   <a class="logo" href="#">NOC<b>TURNE</b></a>
   <div class="hdr-right" id="hdrRight">
-    <button class="btn-sm" onclick="enterGuest()">Invitado</button>
-    <button class="btn-sm gold" id="loginBtn" onclick="showAuth()">Entrar</button>
+    <button class="btn-sm gold" id="loginBtn" onclick="showAuth()">Iniciar sesión</button>
   </div>
 </header>
 
@@ -1631,7 +1630,12 @@ async function loadState() {
     uvData.forEach(r => { votes[r.venue_id] = (votes[r.venue_id] || 0) + 1; });
   }
   // Load current user's vote from localStorage (session-specific)
+  // Load anon/cached vote from localStorage
   try { const v = localStorage.getItem('nocheba-myvote'); if(v) myVote = JSON.parse(v); } catch(e) {}
+  // Count anon vote in totals if not yet in Supabase
+  if (myVote !== null && !currentUser) {
+    votes[myVote] = (votes[myVote] || 0) + 1;
+  }
   // If user is logged in, verify their vote from Supabase
   if (currentUser) {
     const uv = await sbGet('user_votes', `user_id=eq.${currentUser.id}&select=venue_id`);
@@ -1650,17 +1654,13 @@ function isMyVote(id) { return myVote === id; }
 
 function castVote(e, id) {
   e.stopPropagation();
-  if (!currentUser) {
-    localStorage.setItem('nocheba-pending-vote', id);
-    showToast('Iniciá sesión para votar 👤');
-    setTimeout(function(){ doLoginGoogle(); }, 600);
-    return;
-  }
+  // ── VOTO ANÓNIMO: permitido, guardado en localStorage ──
+  var isAnon = !currentUser;
 
   var wasMyVote = isMyVote(id);
   var prevVote = myVote;
 
-  // ── INSTANT UPDATE — sin await, sin esperas ──
+  // INSTANT UPDATE
   if (wasMyVote) {
     votes[id] = Math.max(0, (votes[id] || 1) - 1);
     myVote = null;
@@ -1676,24 +1676,27 @@ function castVote(e, id) {
     showToast(prevVote !== null ? 'Voto cambiado a ' + vname + ' 🎉' : '¡Vas a ir a ' + vname + '! 🎉');
   }
   delete voterCache[id];
+  try { localStorage.setItem('nocheba-myvote', JSON.stringify(myVote)); } catch(ex) {}
 
-  // ── RENDER INMEDIATO ──
   renderAllUI();
   refreshModalVote(id);
   if (prevVote !== null && prevVote !== id) refreshModalVote(prevVote);
 
-  // ── SUPABASE EN BACKGROUND (fire & forget) ──
-  try { localStorage.setItem('nocheba-myvote', JSON.stringify(myVote)); } catch(e2) {}
-  (function(uid, vid, prev, was, vc) {
-    if (was) {
-      sbDelete('user_votes', 'user_id=eq.' + uid);
-      sbUpsert('votes', { venue_id: vid, count: vc[vid] || 0 });
-    } else {
-      if (prev !== null) sbUpsert('votes', { venue_id: prev, count: vc[prev] || 0 });
-      sbUpsert('votes', { venue_id: vid, count: vc[vid] || 0 });
-      sbUpsert('user_votes', { user_id: uid, venue_id: vid, updated_at: new Date().toISOString() });
-    }
-  })(currentUser.id, id, prevVote, wasMyVote, votes);
+  // SUPABASE solo si está logueado
+  if (!isAnon) {
+    (function(uid, vid, prev, was, vc) {
+      if (was) {
+        sbDelete('user_votes', 'user_id=eq.' + uid);
+        sbUpsert('votes', { venue_id: vid, count: vc[vid] || 0 });
+      } else {
+        if (prev !== null) sbUpsert('votes', { venue_id: prev, count: vc[prev] || 0 });
+        sbUpsert('votes', { venue_id: vid, count: vc[vid] || 0 });
+        sbUpsert('user_votes', { user_id: uid, venue_id: vid, updated_at: new Date().toISOString() });
+      }
+    })(currentUser.id, id, prevVote, wasMyVote, votes);
+  }
+  return; // early return — rest of function handled above
+
 }
 
 // ── RENDER VOTERS PREVIEW (avatars + click to see all) ──
@@ -2289,6 +2292,11 @@ function closeModal() {
 
 // ── VOTERS LIST MODAL ──
 async function openVotersList(venueId) {
+  if (!currentUser) {
+    showToast('Iniciá sesión para ver quién va 👤');
+    setTimeout(function(){ showAuth(); }, 600);
+    return;
+  }
   const v = venues.find(function(x){ return x.id === venueId; });
   if (!v) return;
 
@@ -2728,6 +2736,12 @@ async function handleOAuthCallback() {
     showToast('¡Bienvenido ' + currentUser.name.split(' ')[0] + '! 🎉');
 
     // Execute pending vote if exists
+    // Si había voto anónimo, lo persistimos a Supabase
+    const anonVote = myVote;
+    if (anonVote !== null && !isNaN(anonVote)) {
+      sbUpsert('user_votes', { user_id: session.user.id, venue_id: anonVote, updated_at: new Date().toISOString() });
+      sbUpsert('votes', { venue_id: anonVote, count: votes[anonVote] || 1 });
+    }
     const pendingVote = localStorage.getItem('nocheba-pending-vote');
     if (pendingVote) {
       localStorage.removeItem('nocheba-pending-vote');
@@ -2770,8 +2784,7 @@ function updateHeader() {
       : currentUser.name.charAt(0).toUpperCase();
     hdr.innerHTML = `<div class="hdr-avatar" onclick="showProfile()" title="${currentUser.name}">${av}</div>`;
   } else {
-    hdr.innerHTML = `<button class="btn-sm" onclick="enterGuest()">Invitado</button>
-    <button class="btn-sm gold" id="loginBtn" onclick="showAuth()">Entrar</button>`;
+    hdr.innerHTML = `<button class="btn-sm gold" id="loginBtn" onclick="showAuth()">Iniciar sesión</button>`;
   }
 }
 
