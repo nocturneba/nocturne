@@ -1523,6 +1523,9 @@ async function castVote(e, id) {
     await sbUpsert('user_votes', { user_id: currentUser.id, venue_id: id, updated_at: new Date().toISOString() });
   }
   await saveState();
+  // Invalidate voter cache for affected venues
+  delete voterCache[id];
+  if (myVote !== null) delete voterCache[myVote];
   renderAll();
   refreshModalVote(id);
 }
@@ -1532,18 +1535,29 @@ function refreshModalVote(id) {
   if (!btn) return;
   const on = isMyVote(id);
   btn.className = 'vote-btn-big' + (on ? ' on' : '');
-  btn.innerHTML = `<span class="vb-icon">${on ? '✓' : '🙋'}</span><span class="vb-n">${getV(id)}</span><span class="vb-lbl">${on ? 'Tu voto' : 'Voy aquí'}</span>`;
+  btn.innerHTML = '<span class="vb-icon">' + (on ? '✓' : '🙋') + '</span><span class="vb-n">' + getV(id) + '</span><span class="vb-lbl">' + (on ? 'Tu voto' : 'Voy aquí') + '</span>';
   const sub = document.getElementById('mvote-sub-' + id);
-  if (sub) sub.textContent = `${getV(id)} persona${getV(id)!==1?'s':''} quieren ir · Solo podés votar 1 lugar`;
-  // Refresh voters
-  getVotersForVenue(id).then(voters => {
-    const el = document.getElementById('voters-' + id);
+  if (sub) sub.textContent = getV(id) + ' persona' + (getV(id)!==1?'s':'') + ' quieren ir · Solo podés votar 1 lugar';
+
+  // Refresh the "Van esta noche" section
+  getVotersForVenue(id).then(function(voters) {
+    voterCache[id] = voters; // update cache
+    renderRanking();         // update ranking with fresh avatars
+
+    const sec = document.getElementById('voters-section-' + id);
+    const el  = document.getElementById('voters-' + id);
     if (!el) return;
-    if (!voters.length) { el.innerHTML = ''; return; }
-    el.innerHTML = voters.map(u => {
-      const av = u.avatar ? `<img src="${u.avatar}" alt="">` : u.name.charAt(0).toUpperCase();
-      const ig = u.instagram ? `<a href="https://instagram.com/${u.instagram}" target="_blank" class="voter-chip-ig">@${u.instagram}</a>` : '';
-      return `<div class="voter-chip"><div class="voter-chip-av">${av}</div><span class="voter-chip-name">${u.name}</span>${ig}</div>`;
+
+    if (!voters.length) {
+      el.innerHTML = '';
+      if (sec) sec.style.display = 'none';
+      return;
+    }
+    if (sec) sec.style.display = '';
+    el.innerHTML = voters.map(function(u) {
+      const av = u.avatar ? '<img src="' + u.avatar + '" alt="">' : u.name.charAt(0).toUpperCase();
+      const ig = u.instagram ? '<a href="https://instagram.com/' + u.instagram + '" target="_blank" class="voter-chip-ig">@' + u.instagram + '</a>' : '';
+      return '<div class="voter-chip"><div class="voter-chip-av">' + av + '</div><span class="voter-chip-name">' + u.name + '</span>' + ig + '</div>';
     }).join('');
   });
 }
@@ -1925,17 +1939,19 @@ function openModal(id) {
   document.body.style.overflow = 'hidden';
 
   // Load voters
-  getVotersForVenue(v.id).then(voters => {
+  getVotersForVenue(v.id).then(function(voters) {
+    voterCache[v.id] = voters;
     const el = document.getElementById('voters-' + v.id);
     const sec = document.getElementById('voters-section-' + v.id);
     if (!el) return;
     if (!voters.length) { el.innerHTML = ''; if(sec) sec.style.display='none'; return; }
     if(sec) sec.style.display='';
-    el.innerHTML = voters.map(u => {
-      const av = u.avatar ? `<img src="${u.avatar}" alt="">` : u.name.charAt(0).toUpperCase();
-      const ig = u.instagram ? `<a href="https://instagram.com/${u.instagram}" target="_blank" class="voter-chip-ig">@${u.instagram}</a>` : '';
-      return `<div class="voter-chip"><div class="voter-chip-av">${av}</div><span class="voter-chip-name">${u.name}</span>${ig}</div>`;
+    el.innerHTML = voters.map(function(u) {
+      const av = u.avatar ? '<img src="' + u.avatar + '" alt="">' : u.name.charAt(0).toUpperCase();
+      const ig = u.instagram ? '<a href="https://instagram.com/' + u.instagram + '" target="_blank" class="voter-chip-ig">@' + u.instagram + '</a>' : '';
+      return '<div class="voter-chip"><div class="voter-chip-av">' + av + '</div><span class="voter-chip-name">' + u.name + '</span>' + ig + '</div>';
     }).join('');
+    renderRanking();
   });
 
   setTimeout(() => {
