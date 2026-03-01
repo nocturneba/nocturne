@@ -318,6 +318,9 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .voter-chip-ig{font-size:10px;color:var(--gold2);text-decoration:none;}
 .voter-chip-ig:hover{color:var(--gold3);text-decoration:underline;}
 
+.fav-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:4px 6px;opacity:.5;transition:all .2s;line-height:1;}
+.fav-btn.on{opacity:1;filter:drop-shadow(0 0 4px var(--gold));}
+.fav-btn:hover{opacity:.8;transform:scale(1.2);}
 /* TOAST */
 .toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink3);border:1px solid var(--gold);color:var(--gold);font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 18px;opacity:0;transition:all .3s;z-index:800;white-space:nowrap;}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -336,7 +339,9 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 <div class="tabs">
   <button class="tab on" onclick="switchTab('tonight',this)">🔥 Esta Noche</button>
   <button class="tab" onclick="switchTab('directory',this)">🏛 Directorio</button>
+  <button class="tab" onclick="switchTab('favorites',this)">❤️ Favs</button>
   <button class="tab" onclick="switchTab('map',this)">🗺 Mapa</button>
+  <button class="tab" onclick="switchTab('contact',this)">✉️ Contacto</button>
 </div>
 
 <!-- TONIGHT -->
@@ -376,6 +381,9 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
       <button class="fb" onclick="filter('zonanorte',this)">Zona Norte</button>
     </div>
   </div>
+  <div style="padding:0 16px 12px">
+    <input id="search-input" type="text" placeholder="🔍 Buscar boliche o bar..." oninput="searchVenues(this.value)" style="width:100%;padding:12px 16px;background:var(--ink3);border:1px solid var(--line2);color:var(--white);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1px;outline:none;box-sizing:border-box;">
+  </div>
   <div class="grid" id="grid"></div>
 </div>
 
@@ -385,6 +393,49 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
   <div class="map-side">
     <div class="map-side-ttl">📍 Todos los lugares</div>
     <div id="map-list"></div>
+  </div>
+</div>
+
+<!-- FAVORITES VIEW -->
+<div class="view" id="favorites-view">
+  <div class="dir-hero" style="padding:28px 20px 16px">
+    <div class="dir-h" style="font-size:clamp(36px,10vw,64px)">MIS<em>FAVS</em></div>
+  </div>
+  <div style="padding:0 16px 16px">
+    <div id="favs-empty" style="text-align:center;padding:60px 20px;color:var(--muted);display:none">
+      <div style="font-size:40px;margin-bottom:12px">❤️</div>
+      <div style="font-size:13px;letter-spacing:1px">Todavía no guardaste ningún lugar.<br>Tocá el ❤️ en cualquier boliche.</div>
+    </div>
+    <div class="grid" id="favs-grid"></div>
+  </div>
+</div>
+
+<!-- CONTACT VIEW -->
+<div class="view" id="contact-view">
+  <div class="dir-hero" style="padding:40px 20px 28px;text-align:center">
+    <div class="dir-h" style="font-size:clamp(36px,10vw,64px)">CONTA<em>CTO</em></div>
+    <div style="color:var(--muted);font-size:12px;letter-spacing:1px;margin-top:16px;max-width:320px;margin-left:auto;margin-right:auto">¿Tenés un boliche, bar o evento? Escribinos y hablamos.</div>
+  </div>
+  <div style="max-width:480px;margin:0 auto;padding:0 20px 60px">
+    <div style="background:var(--ink3);border:1px solid var(--line2);padding:28px;margin-bottom:16px">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Instagram</div>
+      <a href="https://instagram.com/nightlife.bsas" target="_blank" style="color:var(--gold2);font-size:18px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:10px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        @nightlife.bsas
+      </a>
+    </div>
+    <div style="background:var(--ink3);border:1px solid var(--line2);padding:28px;margin-bottom:32px">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Email</div>
+      <a href="mailto:hola@nightlife.com.ar" style="color:var(--gold2);font-size:16px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:10px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
+        hola@nightlife.com.ar
+      </a>
+    </div>
+    <div style="background:linear-gradient(135deg,var(--accent),var(--gold));padding:24px;text-align:center">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--white);opacity:.8;margin-bottom:8px">¿Querés aparecer acá?</div>
+      <div style="font-size:14px;color:var(--white);font-weight:600;margin-bottom:16px">Escribinos con tu propuesta de negocio</div>
+      <a href="mailto:hola@nightlife.com.ar?subject=Propuesta de negocio&body=Hola! Me gustaría hablar sobre..." style="display:inline-block;background:var(--white);color:var(--ink);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;text-decoration:none">Contactar ahora →</a>
+    </div>
   </div>
 </div>
 
@@ -521,7 +572,7 @@ const venues = [
     desc:"El templo de la electrónica porteña bajo los arcos del tren Mitre. DJs internacionales, techno de primer nivel. También tiene Studio Crobar al lado.",
     lat:-34.5765, lng:-58.4285,
     music:["Techno","House","Electrónica"],
-    ticketUrl:"https://www.passline.com/productora/2443149-crobar-club",
+    ticketUrl:"https://www.passline.com/busqueda?q=crobar",
     ticketEventUrl:null, // ← actualizar semanalmente con el link del evento específico
     events:[{d:"28",m:"Feb",name:"Crobar Techno",dj:"Artistas internacionales",hoy:true},{d:"08",m:"Mar",name:"Carl Cox",dj:"Legendary DJ set",hoy:false},{d:"15",m:"Mar",name:"TIGA Live",dj:"DJ set + performance",hoy:false}],
     maps:"https://maps.google.com/?q=Av+del+Libertador+3883+Palermo+Buenos+Aires" },
@@ -533,7 +584,7 @@ const venues = [
     desc:"El club más exclusivo de la Costanera Norte. Vista al río, dress code estricto y la mejor clientela de BA. Terraza y varios VIPs.",
     lat:-34.5538, lng:-58.4175,
     music:["Reggaetón","House","Comercial"],
-    ticketUrl:"https://www.passline.com/productora/240965-homerixsrl",
+    ticketUrl:"https://www.passline.com/busqueda?q=jet+lounge+costanera",
     ticketEventUrl:null, // ← actualizar semanalmente con el link del evento específico
     events:[{d:"28",m:"Feb",name:"Sábado VIP",dj:"DJ Residente",hoy:true},{d:"07",m:"Mar",name:"Viernes de Jet",dj:"DJ Internacional",hoy:false}],
     maps:"https://maps.google.com/?q=Jet+Lounge+Av+Rafael+Obligado+4801+Costanera+Buenos+Aires" },
@@ -740,7 +791,7 @@ const venues = [
     desc:"Un palacio del siglo XIX transformado en club. Techos altos, luces dramáticas y una pista potente en el corazón histórico.",
     lat:-34.6108, lng:-58.3764,
     music:["Cachengue","Electrónica","Hip-Hop"],
-    ticketUrl:"https://www.passline.com/productora/palacio-alsina",
+    ticketUrl:"https://www.passline.com/busqueda?q=palacio+alsina",
     ticketEventUrl:null, // ← actualizar semanalmente con el link del evento específico
     events:[{d:"28",m:"Feb",name:"Palacio Presenta",dj:"Cachengue & Electrónica",hoy:true},{d:"07",m:"Mar",name:"Viernes de Palacio",dj:"DJ Residente",hoy:false}],
     maps:"https://maps.google.com/?q=Palacio+Alsina+Adolfo+Alsina+940+Buenos+Aires" },
@@ -1113,6 +1164,8 @@ const venues = [
 let votes = {}; // { venueId: count }
 let myVote = null; // Solo UN voto por usuario (id del lugar o null)
 let currentFilter = 'todos';
+let favs = new Set(); // Set of venue IDs
+let searchQuery = '';
 let leafletMap = null, markers = {};
 let mpClub = null, mpQty = 1;
 
@@ -1235,6 +1288,63 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('on'), 2200);
 }
 
+// ── FAVORITES ──
+function isFav(id) { return favs.has(id); }
+function loadFavs() {
+  try { const f = localStorage.getItem('nocheba-favs'); if(f) favs = new Set(JSON.parse(f)); } catch(e) {}
+}
+function saveFavs() {
+  try { localStorage.setItem('nocheba-favs', JSON.stringify([...favs])); } catch(e) {}
+}
+function toggleFav(e, id) {
+  e.stopPropagation();
+  if (favs.has(id)) { favs.delete(id); showToast('Eliminado de favoritos'); }
+  else { favs.add(id); showToast('❤️ Guardado en favoritos'); }
+  saveFavs();
+  renderAll();
+  renderFavs();
+}
+function renderFavs() {
+  const grid = document.getElementById('favs-grid');
+  const empty = document.getElementById('favs-empty');
+  if (!grid) return;
+  const list = venues.filter(v => favs.has(v.id));
+  if (!list.length) { grid.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = list.map((v,i) => {
+    const on = isMyVote(v.id);
+    return `<div class="club-card" style="animation-delay:${i*.07}s" onclick="openModal(${v.id})">
+      <div class="card-img">
+        <div class="card-bg" style="background:${v.bg}">${v.emoji}</div>
+        <div class="card-badge">${v.badge}</div>
+        <div class="card-status ${v.open?'open':'closed'}"><span class="status-dot"></span>${v.open?'Abierto':'Cerrado'}</div>
+        <div class="card-type">${v.type==='bar'?'BAR':'BOLICHE'}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-zone">${v.zone}</div>
+        <div class="card-name">${v.name}</div>
+        <div class="card-desc">${v.desc}</div>
+        <div class="tags">${v.music.map(m=>`<span class="tag">${m}</span>`).join('')}</div>
+        <div class="card-foot">
+          <div class="card-pr">${v.type==='bar'?'Bar libre':'Entrada'} <b>${v.ticketPrice?'$'+v.ticketPrice.toLocaleString('es-AR'):'gratis'}</b></div>
+          <div style="display:flex;gap:4px;align-items:center">
+            <button class="fav-btn on" onclick="toggleFav(event,${v.id})">❤️</button>
+            <button class="vote-btn${on?' on':''}" onclick="castVote(event,${v.id})">
+              <span>${on?'✓':'🙋'}</span><span class="vote-count">${getV(v.id)}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SEARCH ──
+function searchVenues(q) {
+  searchQuery = q.toLowerCase().trim();
+  renderDir(currentFilter);
+}
+
 // ── TABS ──
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
@@ -1242,6 +1352,7 @@ function switchTab(tab, btn) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
   document.getElementById(tab + '-view').classList.add('on');
   if (tab === 'map') initMap();
+  if (tab === 'favorites') renderFavs();
 }
 
 // ── TONIGHT ──
@@ -1297,7 +1408,8 @@ function renderTonight() {
 
 // ── DIRECTORY ──
 function renderDir(f) {
-  const list = f === 'todos' ? venues : venues.filter(v => v.cat.includes(f));
+  let list = f === 'todos' ? venues : venues.filter(v => v.cat.includes(f));
+  if (searchQuery) list = list.filter(v => v.name.toLowerCase().includes(searchQuery) || v.zone.toLowerCase().includes(searchQuery) || v.music.some(m => m.toLowerCase().includes(searchQuery)));
   const open = list.filter(v => v.open).length;
   document.getElementById('live-count').textContent = `${list.length} lugares · ${open} abiertos esta semana`;
   if (!list.length) {
@@ -1322,9 +1434,12 @@ function renderDir(f) {
         <div class="tags">${v.music.map(m=>`<span class="tag">${m}</span>`).join('')}</div>
         <div class="card-foot">
           <div class="card-pr">${v.type==='bar'?'Bar libre':'Entrada'} <b>${v.ticketPrice?'$'+v.ticketPrice.toLocaleString('es-AR'):'gratis'}</b></div>
-          <button class="vote-btn${on?' on':''}" onclick="castVote(event,${v.id})">
-            <span>${on?'✓':'🙋'}</span><span class="vote-count">${getV(v.id)}</span>
-          </button>
+          <div style="display:flex;gap:4px;align-items:center">
+            <button class="fav-btn${isFav(v.id)?' on':''}" onclick="toggleFav(event,${v.id})" title="Guardar en favoritos">${isFav(v.id)?'❤️':'🤍'}</button>
+            <button class="vote-btn${on?' on':''}" onclick="castVote(event,${v.id})">
+              <span>${on?'✓':'🙋'}</span><span class="vote-count">${getV(v.id)}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -1808,6 +1923,7 @@ function renderAll() {
 
 // ── INIT ──
 async function init() {
+  loadFavs();
   await loadCurrentUser();
   await loadState();
   updateHeader();
