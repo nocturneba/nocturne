@@ -11,34 +11,33 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Nocturne">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-180.png">
 <!-- Open Graph para compartir por WhatsApp/IG -->
 <meta property="og:title" content="Nocturne BsAs 🌙">
 <meta property="og:description" content="¿A dónde salís esta noche? Votá tu boliche favorito de Buenos Aires.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://raw.githubusercontent.com/Maximartin8/nocheba/main/nocturne-logo.png">
+<meta property="og:image" content="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root {
-  --ink: #07080a;
-  --ink2: #0f1012;
-  --ink3: #181a1e;
-  --ink4: #202228;
-  --line: #252830;
-  --line2: #2e3038;
-  --muted: #6b7280;
-  --mid: #9ca3af;
-  --pale: #d1d5db;
-  --cream: #e5e7eb;
-  --white: #f3f4f6;
-  --gold: #cbd5e1;
-  --gold2: #94a3b8;
-  --gold3: #e2e8f0;
-  --accent: #475569;
-  --accent2: #94a3b8;
-  --red: #e53935;
+  --ink: #080608;
+  --ink2: #100e12;
+  --ink3: #181520;
+  --ink4: #201c2a;
+  --line: #2a2535;
+  --line2: #352f42;
+  --muted: #5a5268;
+  --mid: #8a80a0;
+  --pale: #c0b8d4;
+  --cream: #ede8f0;
+  --white: #f5f0f8;
+  --gold: #c4527a;
+  --gold2: #e06090;
+  --gold3: #f0a0c0;
+  --accent: #7c3aed;
+  --accent2: #a855f7;
+  --red: #e53e6b;
   --green: #22c55e;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -114,7 +113,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .filter-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
 .filter-row::-webkit-scrollbar{display:none;}
 .fb{flex-shrink:0;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;padding:7px 14px;border:1px solid var(--line2);background:none;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'Montserrat',sans-serif;}
-.fb:hover,.fb.on{border-color:var(--gold);color:var(--gold);background:rgba(148,163,184,.05);}
+.fb:hover,.fb.on{border-color:var(--gold);color:var(--gold);background:rgba(184,151,90,.05);}
 
 .grid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);padding-bottom:80px;}
 @media(min-width:600px){.grid{grid-template-columns:1fr 1fr;}}
@@ -141,10 +140,9 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .card-foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line);}
 .card-pr{font-size:12px;color:var(--mid);}
 .card-pr b{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--gold2);font-weight:500;}
-.vote-btn{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line2);background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent;}
+.vote-btn{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line2);background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
 .vote-btn:hover{border-color:var(--gold);color:var(--gold);}
-.vote-btn:active{transform:scale(0.93);}
-.vote-btn.on{border-color:var(--gold);background:rgba(148,163,184,.10);color:var(--gold);}
+.vote-btn.on{border-color:var(--gold);background:rgba(184,151,90,.1);color:var(--gold);}
 .vote-count{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;line-height:1;}
 
 /* ── MAP ── */
@@ -165,7 +163,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 /* Leaflet dark */
 .leaflet-container{background:#111;}
 .leaflet-tile{filter:brightness(.55) invert(1) hue-rotate(180deg) saturate(.35) contrast(1.1);}
-.map-pin{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--gold);background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 10px rgba(148,163,184,.25);cursor:pointer;}
+.map-pin{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--gold);background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 10px rgba(184,151,90,.35);cursor:pointer;}
 .leaflet-popup-content-wrapper{background:var(--ink3);border:1px solid var(--line2);border-radius:0;box-shadow:0 8px 24px rgba(0,0,0,.7);color:var(--white);}
 .leaflet-popup-tip{background:var(--ink3);}
 .pp-zone{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
@@ -206,10 +204,9 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .vs-info{}
 .vs-ttl{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;}
 .vs-sub{font-size:11px;color:var(--muted);margin-top:2px;}
-.vote-btn-big{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 18px;border:1px solid var(--line2);background:none;color:var(--muted);font-family:'Montserrat',sans-serif;cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent;}
+.vote-btn-big{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 18px;border:1px solid var(--line2);background:none;color:var(--muted);font-family:'Montserrat',sans-serif;cursor:pointer;transition:all .22s;}
 .vote-btn-big:hover{border-color:var(--gold);color:var(--gold);}
-.vote-btn-big:active{transform:scale(0.93);}
-.vote-btn-big.on{border-color:var(--gold);background:rgba(148,163,184,.10);color:var(--gold);}
+.vote-btn-big.on{border-color:var(--gold);background:rgba(184,151,90,.1);color:var(--gold);}
 .vb-icon{font-size:20px;}
 .vb-n{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;line-height:1;}
 .vb-lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;}
@@ -280,12 +277,12 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .avatar-preview img{width:100%;height:100%;object-fit:cover;}
 .avatar-upload-info{flex:1;}
 .avatar-upload-btn{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);background:none;border:1px solid var(--gold);padding:6px 12px;cursor:pointer;font-family:'Montserrat',sans-serif;transition:all .2s;}
-.avatar-upload-btn:hover{background:rgba(148,163,184,.10);}
+.avatar-upload-btn:hover{background:rgba(184,151,90,.1);}
 .avatar-note{font-size:10px;color:var(--muted);margin-top:5px;}
 
 /* IG LINK */
 .auth-ig{display:flex;align-items:center;gap:8px;padding:10px 11px;background:var(--ink3);border:1px solid var(--line2);margin-bottom:10px;transition:border-color .2s;}
-.auth-ig:focus-within{border-color:var(--gold);}
+.auth-ig:focus-within{border-color:#e1306c;}
 .auth-ig-icon{font-size:16px;flex-shrink:0;}
 .auth-ig input{background:none;border:none;color:var(--white);font-family:'Montserrat',sans-serif;font-size:13px;outline:none;flex:1;}
 .auth-ig input::placeholder{color:var(--muted);}
@@ -300,8 +297,8 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .profile-avatar-big img{width:100%;height:100%;object-fit:cover;}
 .profile-info{flex:1;}
 .profile-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;line-height:1;}
-.profile-ig{font-size:11px;color:var(--gold2);margin-top:3px;display:flex;align-items:center;gap:4px;}
-.profile-ig a{color:var(--gold2);text-decoration:none;}
+.profile-ig{font-size:11px;color:#e1306c;margin-top:3px;display:flex;align-items:center;gap:4px;}
+.profile-ig a{color:#e1306c;text-decoration:none;}
 .profile-ig a:hover{text-decoration:underline;}
 .profile-stats{display:flex;gap:18px;margin-top:8px;}
 .profile-stat{font-size:10px;color:var(--muted);letter-spacing:1px;}
@@ -456,7 +453,8 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 <header>
   <a class="logo" href="#">NOC<b>TURNE</b></a>
   <div class="hdr-right" id="hdrRight">
-    <button class="btn-sm gold" id="loginBtn" onclick="showAuth()">Iniciar sesión</button>
+    <button class="btn-sm" onclick="enterGuest()">Invitado</button>
+    <button class="btn-sm gold" id="loginBtn" onclick="showAuth()">Entrar</button>
   </div>
 </header>
 
@@ -515,7 +513,6 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
   <div class="filters">
     <div class="filter-row">
       <button class="fb on" onclick="filter('todos',this)">Todos</button>
-      <button class="fb gold-filter" onclick="filter('top10',this)">⭐ Top 10</button>
       <button class="fb" onclick="filter('boliche',this)">Boliches</button>
       <button class="fb" onclick="filter('bar',this)">Bares</button>
       <button class="fb" onclick="filter('electronica',this)">Electrónica</button>
@@ -582,11 +579,11 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
       </div>
     </a>
 
-        <a href="mai&#108;to&#58;nocturnearg&#64;gmail&#46;com" style="display:flex;align-items:center;gap:14px;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--white)">
+    <a href="/cdn-cgi/l/email-protection#355b5a564140475b50544752755258545c591b565a58" style="display:flex;align-items:center;gap:14px;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--white)">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
       <div>
         <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Email</div>
-        <div style="font-size:14px;color:var(--pale)">nocturnearg&#64;gmail&#46;com</div>
+        <div style="font-size:14px;color:var(--pale)"><span class="__cf_email__" data-cfemail="046a6b677071766a61657663446369656d682a676b69">[email&#160;protected]</span></div>
       </div>
     </a>
 
@@ -595,7 +592,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
       <div style="font-size:13px;color:var(--pale);line-height:1.8;margin-bottom:8px">Nocturne es la plataforma donde <b style="color:var(--white)">miles de personas</b> deciden a dónde ir cada semana en Buenos Aires.</div>
       <div style="font-size:13px;color:var(--pale);line-height:1.8;margin-bottom:8px">Si tenés un boliche, bar o evento, aparecer acá significa visibilidad directa con tu público objetivo — la gente que ya está buscando dónde salir.</div>
       <div style="font-size:13px;color:var(--pale);line-height:1.8;margin-bottom:28px">Escribinos y te contamos cómo sumarte.</div>
-      <a href="mai&#108;to&#58;nocturnearg&#64;gmail&#46;com?subject=Quiero%20aparecer%20en%20Nocturne" style="display:inline-block;border:1px solid var(--gold);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;text-decoration:none;transition:all .2s;margin-right:12px">Escribir →</a>
+      <a href="/cdn-cgi/l/email-protection#ed83828e99989f83888c9f8aad8a808c8481c38e8280d29e988f87888e99d0bc9884889f82cd8c9d8c9f888e889fcd8883cda3828e99989f8388cb8f828994d0a582818cc1cd8088cd8a989e998c9f2e408ccd9e98808c9fcd8084cd81988a8c9fc2889b88839982cd8ccda3828e99989f8388c3cda1889ecd8e9888839982d7" style="display:inline-block;border:1px solid var(--gold);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;text-decoration:none;transition:all .2s;margin-right:12px">Escribir →</a>
       <a href="https://instagram.com/nocturne.ba" target="_blank" style="display:inline-block;border:1px solid var(--line2);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;text-decoration:none;transition:all .2s">DM en IG →</a>
     </div>
 
@@ -629,7 +626,6 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 
   </div>
 </div>
-
 
 <!-- MODAL -->
 <div class="modal-ov" id="modalOv" onclick="closeModalOv(event)">
@@ -1531,149 +1527,6 @@ const venues = [
     ticketEventUrl:null, // ← actualizar semanalmente con el link del evento específico
     events:[{d:"28",m:"Feb",name:"Velvet Viernes",dj:"House + Cachengue",hoy:true},{d:"07",m:"Mar",name:"Velvet Sábado",dj:"DJ Internacional",hoy:false}],
     maps:"https://maps.google.com/?q=Av+Cabildo+3245+Belgrano+Buenos+Aires" },
-  // ── NUEVOS ──
-  { id:81, type:"bar", name:"Negroni", zone:"Palermo", cat:["bar","speakeasy","palermo","premium"],
-    badge:"Trendy", emoji:"🍊", bg:"linear-gradient(135deg,#1a0800,#2e1000)",
-    open:true, price:"$4.000 – $8.000", ticketPrice:0,
-    address:"Thames 1762, Palermo, CABA", hours:"Mar a Dom · 19:00–02:00",
-    desc:"El bar de cocktails más trendy de Palermo ahora mismo. Ambiente íntimo, bartenders de primer nivel y el Negroni más clásico de Buenos Aires. Siempre con lista de espera los fines de semana.",
-    lat:-34.5885, lng:-58.4280,
-    music:["Jazz","Deep House","Ambient"],
-    ticketUrl:null, ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Negroni Night",dj:"Cocktails en vivo",hoy:false}],
-    maps:"https://maps.google.com/?q=Thames+1762+Palermo+Buenos+Aires" },
-
-  { id:82, type:"bar", name:"Gran Bar Danzón", zone:"Recoleta", cat:["bar","speakeasy","recoleta","premium"],
-    badge:"Clásico", emoji:"🥂", bg:"linear-gradient(135deg,#0a0a1a,#12122a)",
-    open:true, price:"$5.000 – $10.000", ticketPrice:0,
-    address:"Libertad 1161, Recoleta, CABA", hours:"Lun a Sáb · 20:00–03:00",
-    desc:"Un clásico de culto en Recoleta. Dos pisos, carta de vinos extraordinaria, cocktails de autor y una atmósfera que mezcla jazz y elegancia porteña. Reserva recomendada.",
-    lat:-34.5944, lng:-58.3930,
-    music:["Jazz","Bossa Nova","Lounge"],
-    ticketUrl:null, ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Jazz Friday",dj:"Trío en vivo",hoy:false}],
-    maps:"https://maps.google.com/?q=Libertad+1161+Recoleta+Buenos+Aires" },
-
-  { id:83, type:"boliche", name:"Uniclub", zone:"Palermo", cat:["boliche","electronica","palermo"],
-    badge:"Indie", emoji:"🎸", bg:"linear-gradient(135deg,#050510,#0a0a20)",
-    open:true, price:"$4.000 – $8.000", ticketPrice:4000,
-    address:"Guardia Vieja 3360, Palermo, CABA", hours:"Jue · Vie · Sáb · 00:00–07:00",
-    desc:"El corazón del under palermitano. Electrónica, indie y rock alternativo conviven en un espacio chico e intenso. Sin pretensiones, con mucha onda. La escena más honesta de BsAs.",
-    lat:-34.5960, lng:-58.4270,
-    music:["Electrónica","Indie","Rock Alternativo"],
-    ticketUrl:"https://www.passline.com/busqueda?q=uniclub", ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Uniclub Sábado",dj:"Artistas locales",hoy:false}],
-    maps:"https://maps.google.com/?q=Guardia+Vieja+3360+Palermo+Buenos+Aires" },
-
-  { id:84, type:"bar", name:"Tupe Bar", zone:"Palermo Soho", cat:["bar","palermo"],
-    badge:"De moda", emoji:"🌿", bg:"linear-gradient(135deg,#010a05,#021508)",
-    open:true, price:"$3.500 – $7.000", ticketPrice:0,
-    address:"Gurruchaga 1750, Palermo Soho, CABA", hours:"Mié a Dom · 19:00–02:00",
-    desc:"El bar más de moda en Palermo Soho. Tragos creativos con ingredientes locales, ambiente relajado y música que va subiendo de intensidad a medida que avanza la noche. Perfecto para arrancar.",
-    lat:-34.5903, lng:-58.4320,
-    music:["House","Indie","Pop"],
-    ticketUrl:null, ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Tupe Sábado",dj:"DJ Residente",hoy:false}],
-    maps:"https://maps.google.com/?q=Gurruchaga+1750+Palermo+Buenos+Aires" },
-  // ── NUEVOS CABA ──
-  { id:85, type:"bar", name:"Vereda Adentro", zone:"Nuñez", cat:["bar","vinos","palermo","zonanorte"],
-    badge:"Natural", emoji:"🍷", bg:"linear-gradient(135deg,#0a0f05,#141f08)",
-    open:true, price:"$3.000 – $6.000", ticketPrice:0,
-    address:"11 de Septiembre 3201, Nuñez, CABA", hours:"Mar a Dom · 18:00–01:00",
-    desc:"El bar de vinos naturales, orgánicos y biodinámicos que se convirtió en favorito del barrio. Mostrador de terrazzo con botellas recicladas, vereda enorme y tablas de quesos y charcutería. Ambiente relajado y muy local.",
-    lat:-34.5468, lng:-58.4590,
-    music:["Jazz","Indie","Ambient"],
-    ticketUrl:null, ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Vinos Naturales",dj:"Selección del sommelier",hoy:false}],
-    maps:"https://maps.google.com/?q=11+de+Septiembre+3201+Nunez+Buenos+Aires" },
-
-  { id:86, type:"bar", name:"Overo Bar", zone:"Palermo Viejo", cat:["bar","vinos","palermo","premium"],
-    badge:"Club de Vinos", emoji:"🍇", bg:"linear-gradient(135deg,#0f0508,#1e0a10)",
-    open:true, price:"$4.000 – $9.000", ticketPrice:0,
-    address:"Palermo Viejo, CABA", hours:"Lun a Dom · 18:00–01:00",
-    desc:"Bar y club privado de vinos en Palermo Viejo con 57K seguidores en Instagram. Vinos de autor, raciones de región, quesos y charcutería seleccionada. Galería con calefacción sustentable y terraza. Un espacio para amantes del vino, expertos o principiantes.",
-    lat:-34.5880, lng:-58.4350,
-    music:["Bossa Nova","Jazz","Lo-Fi"],
-    ticketUrl:null, ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Degustación",dj:"Sommelier en vivo",hoy:false}],
-    maps:"https://maps.google.com/?q=Overo+Bar+Palermo+Buenos+Aires" },
-
-  { id:87, type:"bar", name:"The Rouge", zone:"Palermo", cat:["bar","cachengue","electronica","palermo"],
-    badge:"Hot", emoji:"💄", bg:"linear-gradient(135deg,#1a0005,#2e000a)",
-    open:true, price:"$6.000 – $12.000", ticketPrice:6000,
-    address:"Palermo, CABA", hours:"Vie · Sáb · 00:00–08:00",
-    desc:"El boliche más sensual de Palermo. Ambiente íntimo y oscuro, música que mezcla house con cachengue y reggaetón. Famoso por sus performances en vivo y una crowd muy bien onda. Dress code exigente.",
-    lat:-34.5890, lng:-58.4260,
-    music:["House","Cachengue","Reggaetón"],
-    ticketUrl:"https://www.passline.com/busqueda?q=the+rouge+buenos+aires", ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Rouge Sábado",dj:"Residente + Invitado",hoy:false}],
-    maps:"https://maps.google.com/?q=The+Rouge+Palermo+Buenos+Aires" },
-
-  { id:88, type:"boliche", name:"Porto Soho", zone:"Palermo Soho", cat:["boliche","cachengue","palermo"],
-    badge:"De moda", emoji:"🌊", bg:"linear-gradient(135deg,#00101a,#001e30)",
-    open:true, price:"$5.000 – $10.000", ticketPrice:5000,
-    address:"Av. Raúl Scalabrini Ortíz 1425, Palermo, CABA", hours:"Vie · Sáb · 23:30–07:00",
-    desc:"Uno de los boliches más de moda de Palermo Soho. Ambiente moderno, música que combina pop, reggaetón y house. Dos pisos, barra grande y crowd joven con mucha energía.",
-    lat:-34.5940, lng:-58.4280,
-    music:["Pop","Reggaetón","House"],
-    ticketUrl:"https://www.passline.com/busqueda?q=porto+soho", ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Porto Sábado",dj:"DJ Residente",hoy:false}],
-    maps:"https://maps.google.com/?q=Scalabrini+Ortiz+1425+Palermo+Buenos+Aires" },
-
-  { id:89, type:"boliche", name:"Club Severino", zone:"Palermo", cat:["boliche","electronica","hiphop","palermo"],
-    badge:"Lunes", emoji:"🖤", bg:"linear-gradient(135deg,#050505,#101010)",
-    open:true, price:"$4.000 – $8.000", ticketPrice:4000,
-    address:"Guardia Vieja 3360, Palermo, CABA", hours:"Lun · 22:30–06:00",
-    desc:"El único boliche de Buenos Aires que vale la pena los lunes. Desde hace 15 años organiza La Fiesta de los Lunes: hip hop, trap, reggaetón, house y afrobeats. El antídoto perfecto para el inicio de semana.",
-    lat:-34.5960, lng:-58.4270,
-    music:["Hip Hop","Trap","Afrobeats","House"],
-    ticketUrl:"https://www.passline.com/busqueda?q=club+severino", ticketEventUrl:null,
-    events:[{d:"03",m:"Mar",name:"La Fiesta de los Lunes",dj:"Lineup variado",hoy:false}],
-    maps:"https://maps.google.com/?q=Guardia+Vieja+3360+Palermo+Buenos+Aires" },
-
-  { id:90, type:"boliche", name:"Costa 7070", zone:"Costanera Norte", cat:["boliche","electronica","palermo","premium"],
-    badge:"Río", emoji:"🌊", bg:"linear-gradient(135deg,#00080f,#001525)",
-    open:true, price:"$8.000 – $20.000", ticketPrice:8000,
-    address:"Av. Costanera Rafael Obligado 7070, Palermo, CABA", hours:"Jue a Sáb · 20:00–07:00",
-    desc:"El mega complejo frente al río que volvió a poner la Costanera Norte en el mapa. Elegido por Time entre los mejores lugares de 2025. Arquitectura marroquí, cocina de autor, cócteles de primer nivel y pista que arranca de noche. Para +35 que no quieren bancarse boliches de veinteañeros.",
-    lat:-34.5475, lng:-58.4185,
-    music:["House","Deep House","Pop"],
-    ticketUrl:"https://www.passline.com/busqueda?q=costa+7070", ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Costa Sábado",dj:"+35 friendly",hoy:false}],
-    maps:"https://maps.google.com/?q=Costanera+Rafael+Obligado+7070+Buenos+Aires" },
-
-  { id:91, type:"bar", name:"Art District Bar", zone:"Palermo", cat:["bar","palermo"],
-    badge:"Bar + Boliche", emoji:"🎨", bg:"linear-gradient(135deg,#0a0505,#150a0a)",
-    open:true, price:"$3.500 – $7.000", ticketPrice:0,
-    address:"Costa Rica 4619, Palermo, CABA", hours:"Mié a Dom · 20:00–05:00",
-    desc:"Restaurante y bar que a medianoche se convierte en boliche. Cócteles de autor temáticos, tablas fritas, ambiente grupal y shots gratis en la madrugada. El plan ideal cuando el grupo no se decide entre bar o disco.",
-    lat:-34.5872, lng:-58.4240,
-    music:["Cachengue","Pop","Reggaetón"],
-    ticketUrl:null, ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Art District Noche",dj:"Cachengue hasta el alba",hoy:false}],
-    maps:"https://maps.google.com/?q=Costa+Rica+4619+Palermo+Buenos+Aires" },
-
-  { id:92, type:"bar", name:"Presidente Bar", zone:"Recoleta", cat:["bar","premium","recoleta"],
-    badge:"Gourmet + Pista", emoji:"🏛️", bg:"linear-gradient(135deg,#080510,#100a1e)",
-    open:true, price:"$6.000 – $14.000", ticketPrice:0,
-    address:"Pdte. Manuel Quintana 188, Recoleta, CABA", hours:"Mié a Sáb · 20:00–04:00",
-    desc:"En un petit hotel de Recoleta donde vivió Bioy Casares de adolescente. Cena, cócteles de autor y de jueves a sábado se baila. Hits de los 90 y 2000, ambiente de diseño, reserva recomendada. El plan mesa + pista más elegante de BsAs.",
-    lat:-34.5882, lng:-58.3930,
-    music:["90s","2000s","Pop"],
-    ticketUrl:null, ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Noche 90s",dj:"Hits nostálgicos",hoy:false}],
-    maps:"https://maps.google.com/?q=Manuel+Quintana+188+Recoleta+Buenos+Aires" },
-
-  { id:94, type:"bar", name:"Behind Bar", zone:"Palermo Soho", cat:["bar","palermo","cocktails"],
-    badge:"Cócteles", emoji:"🍸", bg:"linear-gradient(135deg,#050a10,#0a1520)",
-    open:true, price:"$3.000 – $7.000", ticketPrice:0,
-    address:"Serrano 1530, Palermo Soho, CABA", hours:"Mar a Dom · 18:00–02:00",
-    desc:"A dos cuadras de Plaza Serrano, arte urbano y diseño industrial. Cócteles de autor con ingredientes locales, DJ en vivo y capacidad para 180 personas. Uno de los favoritos de Palermo desde 2014.",
-    lat:-34.5910, lng:-58.4300,
-    music:["Indie","House","Electronic"],
-    ticketUrl:null, ticketEventUrl:null,
-    events:[{d:"07",m:"Mar",name:"Behind Sábado",dj:"DJ Residente",hoy:false}],
-    maps:"https://maps.google.com/?q=Serrano+1530+Palermo+Buenos+Aires" },
 ];
 
 // ─────────────────────────────────────────────
@@ -1729,12 +1582,7 @@ async function loadState() {
     uvData.forEach(r => { votes[r.venue_id] = (votes[r.venue_id] || 0) + 1; });
   }
   // Load current user's vote from localStorage (session-specific)
-  // Load anon/cached vote from localStorage
   try { const v = localStorage.getItem('nocheba-myvote'); if(v) myVote = JSON.parse(v); } catch(e) {}
-  // Count anon vote in totals if not yet in Supabase
-  if (myVote !== null && !currentUser) {
-    votes[myVote] = (votes[myVote] || 0) + 1;
-  }
   // If user is logged in, verify their vote from Supabase
   if (currentUser) {
     const uv = await sbGet('user_votes', `user_id=eq.${currentUser.id}&select=venue_id`);
@@ -1751,51 +1599,46 @@ async function saveState() {
 function getV(id) { return votes[id] || 0; }
 function isMyVote(id) { return myVote === id; }
 
-function castVote(e, id) {
+async function castVote(e, id) {
   e.stopPropagation();
-  // ── VOTO ANÓNIMO: permitido, guardado en localStorage ──
-  var isAnon = !currentUser;
+  if (!currentUser) {
+    localStorage.setItem('nocheba-pending-vote', id);
+    showToast('Iniciá sesión para votar 👤');
+    setTimeout(function(){ doLoginGoogle(); }, 600);
+    return;
+  }
 
   var wasMyVote = isMyVote(id);
   var prevVote = myVote;
 
-  // INSTANT UPDATE
+  // ── INSTANT VISUAL UPDATE ──
   if (wasMyVote) {
     votes[id] = Math.max(0, (votes[id] || 1) - 1);
     myVote = null;
-    showToast('Voto eliminado');
   } else {
-    if (prevVote !== null) {
-      votes[prevVote] = Math.max(0, (votes[prevVote] || 1) - 1);
-      delete voterCache[prevVote];
-    }
+    if (prevVote !== null) votes[prevVote] = Math.max(0, (votes[prevVote] || 1) - 1);
     myVote = id;
     votes[id] = (votes[id] || 0) + 1;
+  }
+  delete voterCache[id];
+  if (prevVote !== null) delete voterCache[prevVote];
+  refreshModalVote(id);
+  if (prevVote !== null && prevVote !== id) refreshModalVote(prevVote);
+  renderAllUI();
+
+  // ── SAVE TO SUPABASE IN BACKGROUND ──
+  if (wasMyVote) {
+    await sbDelete('user_votes', 'user_id=eq.' + currentUser.id);
+    await sbUpsert('votes', { venue_id: id, count: votes[id] });
+    showToast('Voto eliminado');
+  } else {
+    if (prevVote !== null) await sbUpsert('votes', { venue_id: prevVote, count: votes[prevVote] });
+    await sbUpsert('votes', { venue_id: id, count: votes[id] });
+    await sbUpsert('user_votes', { user_id: currentUser.id, venue_id: id, updated_at: new Date().toISOString() });
     var vname = (venues.find(function(v){ return v.id===id; })||{}).name || '';
     showToast(prevVote !== null ? 'Voto cambiado a ' + vname + ' 🎉' : '¡Vas a ir a ' + vname + '! 🎉');
   }
-  delete voterCache[id];
-  try { localStorage.setItem('nocheba-myvote', JSON.stringify(myVote)); } catch(ex) {}
-
-  renderAllUI();
-  refreshModalVote(id);
-  if (prevVote !== null && prevVote !== id) refreshModalVote(prevVote);
-
-  // SUPABASE solo si está logueado
-  if (!isAnon) {
-    (function(uid, vid, prev, was, vc) {
-      if (was) {
-        sbDelete('user_votes', 'user_id=eq.' + uid);
-        sbUpsert('votes', { venue_id: vid, count: vc[vid] || 0 });
-      } else {
-        if (prev !== null) sbUpsert('votes', { venue_id: prev, count: vc[prev] || 0 });
-        sbUpsert('votes', { venue_id: vid, count: vc[vid] || 0 });
-        sbUpsert('user_votes', { user_id: uid, venue_id: vid, updated_at: new Date().toISOString() });
-      }
-    })(currentUser.id, id, prevVote, wasMyVote, votes);
-  }
-  return; // early return — rest of function handled above
-
+  await saveState();
 }
 
 // ── RENDER VOTERS PREVIEW (avatars + click to see all) ──
@@ -2118,17 +1961,7 @@ function renderTonight() {
 
 // ── DIRECTORY ──
 function renderDir(f) {
-  let list;
-  if (f === 'todos') {
-    list = venues;
-  } else if (f === 'top10') {
-    // Top 10: manually featured venues first, then fill with most voted
-    const featured = venues.filter(v => v.featured);
-    const byVotes = venues.filter(v => !v.featured).sort((a,b) => getV(b.id)-getV(a.id));
-    list = [...featured, ...byVotes].slice(0, 10);
-  } else {
-    list = venues.filter(v => v.cat.includes(f));
-  }
+  let list = f === 'todos' ? venues : venues.filter(v => v.cat.includes(f));
   if (searchQuery) list = list.filter(v => v.name.toLowerCase().includes(searchQuery) || v.zone.toLowerCase().includes(searchQuery) || v.music.some(m => m.toLowerCase().includes(searchQuery)));
 
   // Sort by proximity + relevance
@@ -2136,55 +1969,15 @@ function renderDir(f) {
   const baseLng = userLng || BSAS_LNG;
   const MAX_DIST = 80; // km — beyond this gets penalized (Mar del Plata ~400km)
 
-  // ── SMART SORT ──
-  // Detectar si es noche de fin de semana (viernes/sábado después de las 20hs)
-  const now = new Date();
-  const hr = now.getHours();
-  const dow = now.getDay(); // 0=dom,5=vie,6=sab
-  const isNightOut = (dow === 5 || dow === 6 || dow === 0) && (hr >= 20 || hr < 6);
-  const isWeekend = (dow === 5 || dow === 6 || dow === 0);
-
   list = list.slice().sort(function(a, b) {
     const distA = distKm(baseLat, baseLng, a.lat, a.lng);
     const distB = distKm(baseLat, baseLng, b.lat, b.lng);
-
-    // 1. DISTANCIA — lugares lejanos (Mar del Plata etc) van al fondo
-    const farA = distA > MAX_DIST ? 800 : 0;
-    const farB = distB > MAX_DIST ? 800 : 0;
-
-    // 2. PROXIMIDAD — escala suave, prioriza zona pero no elimina lejanos
-    const proxA = Math.max(0, 15 - distA * 0.8);
-    const proxB = Math.max(0, 15 - distB * 0.8);
-
-    // 3. POPULARIDAD — votos son el signal más fuerte
-    const votesA = getV(a.id) * 5;
-    const votesB = getV(b.id) * 5;
-
-    // 4. EVENTO HOY — sube mucho si hay algo ahora
-    const eventA = a.events.some(function(e){ return e.hoy; }) ? 10 : 0;
-    const eventB = b.events.some(function(e){ return e.hoy; }) ? 10 : 0;
-
-    // 5. TIPO × HORARIO — noche de fin de semana: boliches arriba
-    //    Resto del tiempo: bares y boliches mezclados
-    var typeA = 0, typeB = 0;
-    if (isNightOut) {
-      typeA = a.type === 'boliche' ? 8 : 0;
-      typeB = b.type === 'boliche' ? 8 : 0;
-    } else if (isWeekend) {
-      typeA = a.type === 'boliche' ? 4 : 2;
-      typeB = b.type === 'boliche' ? 4 : 2;
-    }
-
-    // 6. ABIERTO AHORA — pequeño boost
-    const openA = a.open ? 3 : 0;
-    const openB = b.open ? 3 : 0;
-
-    // 7. FEATURED (pagos) — siempre arriba si están en zona del usuario
-    const featA = (a.featured && distA <= MAX_DIST) ? 50 : 0;
-    const featB = (b.featured && distB <= MAX_DIST) ? 50 : 0;
-
-    const scoreA = featA + votesA + proxA + eventA + typeA + openA - farA;
-    const scoreB = featB + votesB + proxB + eventB + typeB + openB - farB;
+    // Penalize places > MAX_DIST km heavily
+    const farA = distA > MAX_DIST ? 1000 : 0;
+    const farB = distB > MAX_DIST ? 1000 : 0;
+    // Relevance score: votes + open bonus + event today bonus
+    const scoreA = (getV(a.id) * 3) + (a.open ? 2 : 0) + (a.events.some(e=>e.hoy) ? 3 : 0) - (distA * 0.1) - farA;
+    const scoreB = (getV(b.id) * 3) + (b.open ? 2 : 0) + (b.events.some(e=>e.hoy) ? 3 : 0) - (distB * 0.1) - farB;
     return scoreB - scoreA;
   });
 
@@ -2434,24 +2227,16 @@ async function openVotersList(venueId) {
   const v = venues.find(function(x){ return x.id === venueId; });
   if (!v) return;
 
-  // Fetch registered voters
+  // Use cache if available, otherwise fetch
   var voters = voterCache[venueId] || await getVotersForVenue(venueId);
 
-  // Inject current logged-in user optimistically
+  // Inject current user optimistically
   if (currentUser && isMyVote(venueId)) {
     var alreadyIn = voters.find(function(u){ return u.id === currentUser.id; });
     if (!alreadyIn) voters = [{ id: currentUser.id, name: currentUser.name, avatar: currentUser.avatar, instagram: currentUser.instagram }].concat(voters);
   }
 
-  // Calculate anon count: total votes - registered voters
-  var totalVotes = getV(venueId);
-  var registeredCount = voters.length;
-  var anonCount = Math.max(0, totalVotes - registeredCount);
-
-  // Also inject current anon user if they voted this venue
-  var isAnonVoter = !currentUser && isMyVote(venueId);
-
-  var count = registeredCount + anonCount;
+  const count = voters.length;
   const ov = document.getElementById('votersListOv');
   const inner = document.getElementById('votersListInner');
 
@@ -2470,7 +2255,7 @@ async function openVotersList(venueId) {
   name.textContent = v.name;
   var sub = document.createElement('div');
   sub.style.cssText = 'font-size:11px;color:var(--gold);margin-top:4px';
-  sub.textContent = (count||0) + ' persona' + ((count||0)!==1?'s':'') + ' van esta semana';
+  sub.textContent = count + ' persona' + (count!==1?'s':'') + ' van esta semana';
   titleWrap.appendChild(zone); titleWrap.appendChild(name); titleWrap.appendChild(sub);
   var closeBtn = document.createElement('button');
   closeBtn.style.cssText = 'background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px;flex-shrink:0;';
@@ -2530,53 +2315,6 @@ async function openVotersList(venueId) {
       list.appendChild(row);
     });
   }
-  // Anon row: show current anon voter + count of other guests
-  if (isAnonVoter || anonCount > 0) {
-    var anonSection = document.createElement('div');
-    anonSection.style.cssText = 'border-top:1px solid var(--line);padding:10px 0;';
-
-    if (isAnonVoter) {
-      // Show current anon user as "Vos (invitado)"
-      var youRow = document.createElement('div');
-      youRow.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);';
-      var youAv = document.createElement('div');
-      youAv.style.cssText = 'width:38px;height:38px;border-radius:50%;background:var(--line2);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;';
-      youAv.textContent = '👤';
-      var youInfo = document.createElement('div');
-      var youName = document.createElement('div');
-      youName.style.cssText = 'font-size:13px;font-weight:600;color:var(--white);';
-      youName.textContent = 'Vos (invitado)';
-      var youSub = document.createElement('div');
-      youSub.style.cssText = 'font-size:10px;color:var(--gold);margin-top:2px;cursor:pointer;';
-      youSub.textContent = 'Iniciá sesión para mostrar tu perfil →';
-      youSub.onclick = function(){ closeVotersList(); setTimeout(showAuth, 300); };
-      youInfo.appendChild(youName); youInfo.appendChild(youSub);
-      youRow.appendChild(youAv); youRow.appendChild(youInfo);
-      anonSection.appendChild(youRow);
-    }
-
-    // Other anon guests count
-    var othersAnon = anonCount - (isAnonVoter ? 0 : 0);
-    if (othersAnon > 0) {
-      var guestRow = document.createElement('div');
-      guestRow.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;';
-      var guestAv = document.createElement('div');
-      guestAv.style.cssText = 'width:38px;height:38px;border-radius:50%;background:var(--ink3);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid var(--line2);flex-shrink:0;';
-      guestAv.textContent = '👥';
-      var guestInfo = document.createElement('div');
-      var guestName = document.createElement('div');
-      guestName.style.cssText = 'font-size:13px;font-weight:600;color:var(--muted);';
-      guestName.textContent = '+' + othersAnon + ' invitado' + (othersAnon !== 1 ? 's' : '');
-      var guestSub = document.createElement('div');
-      guestSub.style.cssText = 'font-size:10px;color:var(--muted);margin-top:2px;';
-      guestSub.textContent = 'Sin cuenta registrada';
-      guestInfo.appendChild(guestName); guestInfo.appendChild(guestSub);
-      guestRow.appendChild(guestAv); guestRow.appendChild(guestInfo);
-      anonSection.appendChild(guestRow);
-    }
-    list.appendChild(anonSection);
-  }
-
   inner.appendChild(list);
 
   ov.classList.add('on');
@@ -2925,12 +2663,6 @@ async function handleOAuthCallback() {
     showToast('¡Bienvenido ' + currentUser.name.split(' ')[0] + '! 🎉');
 
     // Execute pending vote if exists
-    // Si había voto anónimo, lo persistimos a Supabase
-    const anonVote = myVote;
-    if (anonVote !== null && !isNaN(anonVote)) {
-      sbUpsert('user_votes', { user_id: session.user.id, venue_id: anonVote, updated_at: new Date().toISOString() });
-      sbUpsert('votes', { venue_id: anonVote, count: votes[anonVote] || 1 });
-    }
     const pendingVote = localStorage.getItem('nocheba-pending-vote');
     if (pendingVote) {
       localStorage.removeItem('nocheba-pending-vote');
@@ -2973,7 +2705,8 @@ function updateHeader() {
       : currentUser.name.charAt(0).toUpperCase();
     hdr.innerHTML = `<div class="hdr-avatar" onclick="showProfile()" title="${currentUser.name}">${av}</div>`;
   } else {
-    hdr.innerHTML = `<button class="btn-sm gold" id="loginBtn" onclick="showAuth()">Iniciar sesión</button>`;
+    hdr.innerHTML = `<button class="btn-sm" onclick="enterGuest()">Invitado</button>
+    <button class="btn-sm gold" id="loginBtn" onclick="showAuth()">Entrar</button>`;
   }
 }
 
@@ -3136,15 +2869,15 @@ async function saveVoterToVenue(venueId, remove=false) {
 // ── RENDER ALL ──
 // renderAllUI — re-renders everything using current in-memory state (no Supabase reload)
 function renderAllUI() {
-  renderDir(currentFilter);
   renderEvents();
+  renderVenues();
   renderRanking();
   renderFavs();
 }
 
 function renderAll() {
-  renderDir(currentFilter);
   renderEvents();
+  renderDir(currentFilter);
   renderRanking();
 }
 
