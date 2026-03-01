@@ -2123,40 +2123,55 @@ async function handleOAuthCallback() {
   if (!hash.includes('access_token')) return;
   const params = new URLSearchParams(hash.slice(1));
   const accessToken = params.get('access_token');
-  const refreshToken = params.get('refresh_token');
   if (!accessToken) return;
-  // Get user info from Supabase
+
   try {
+    // Get user info from Supabase Auth
     const res = await fetch(SB_URL + '/auth/v1/user', {
       headers: { 'Authorization': 'Bearer ' + accessToken, 'apikey': SB_KEY }
     });
     const userData = await res.json();
-    if (userData.email) {
-      // Check if user exists in our users table, if not create
-      const existingRes = await sbGet('users', '?id=eq.' + userData.id);
-      const existing = existingRes ? await existingRes.json() : [];
-      if (!existing.length) {
-        await sbUpsert('users', {
-          id: userData.id,
-          email: userData.email,
-          name: userData.user_metadata?.full_name || userData.email.split('@')[0],
-          pass_hash: 'google_oauth',
-          avatar: userData.user_metadata?.avatar_url || null,
-          instagram: null,
-          join_date: new Date().toISOString().split('T')[0]
-        });
-      }
-      const userRow = existing[0] || { id: userData.id, email: userData.email, name: userData.user_metadata?.full_name || userData.email.split('@')[0], avatar: userData.user_metadata?.avatar_url || null };
-      currentUser = { id: userRow.id, name: userRow.name, email: userRow.email, avatar: userRow.avatar, instagram: userRow.instagram, joinDate: userRow.join_date };
-      localStorage.setItem('nocheba-session', JSON.stringify(currentUser));
-      localStorage.setItem('nocheba-token', accessToken);
-      window.history.replaceState({}, document.title, window.location.pathname);
-      updateHeader();
-      closeAuth();
-      showToast('¡Bienvenido ' + currentUser.name.split(' ')[0] + '! 🎉');
+    if (!userData.email) return;
+
+    const name = userData.user_metadata?.full_name || userData.email.split('@')[0];
+    const avatar = userData.user_metadata?.avatar_url || null;
+
+    // sbGet already returns parsed JSON — no .json() needed
+    const existing = await sbGet('users', 'id=eq.' + userData.id);
+
+    if (!existing || !existing.length) {
+      // New user — insert into our table
+      await sbUpsert('users', {
+        id: userData.id,
+        email: userData.email,
+        name: name,
+        pass_hash: 'google_oauth',
+        avatar: avatar,
+        instagram: null,
+        join_date: new Date().toISOString().split('T')[0]
+      });
     }
+
+    const userRow = (existing && existing[0]) || {};
+    currentUser = {
+      id: userData.id,
+      name: userRow.name || name,
+      email: userData.email,
+      avatar: userRow.avatar || avatar,
+      instagram: userRow.instagram || null,
+      joinDate: userRow.join_date || new Date().toISOString().split('T')[0]
+    };
+
+    localStorage.setItem('nocheba-session', JSON.stringify(currentUser));
+    localStorage.setItem('nocheba-token', accessToken);
+    window.history.replaceState({}, document.title, window.location.pathname);
+    updateHeader();
+    closeAuth();
+    showToast('¡Bienvenido ' + currentUser.name.split(' ')[0] + '! 🎉');
+
   } catch(e) {
     console.error('OAuth callback error:', e);
+    showToast('Error al iniciar sesión con Google');
   }
 }
 
