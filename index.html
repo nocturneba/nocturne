@@ -595,6 +595,13 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
   <div class="modal"><div class="modal-handle"></div><div id="modalInner"></div></div>
 </div>
 
+<!-- VOTERS LIST OVERLAY -->
+<div class="voters-list-ov" id="votersListOv" onclick="closeVotersListOv(event)">
+  <div class="voters-list-panel">
+    <div id="votersListInner" style="display:flex;flex-direction:column;max-height:70vh;"></div>
+  </div>
+</div>
+
 <!-- MP MODAL -->
 <div class="mp-ov" id="mpOv" onclick="closeMpOv(event)">
   <div class="mp-box" id="mpBox">
@@ -2529,7 +2536,8 @@ async function handleOAuthCallback() {
 
   } catch(e) {
     console.error('OAuth callback error:', e);
-    showToast('Error al iniciar sesión con Google');
+    // Don't show error toast if user just logged in successfully
+    if (!currentUser) showToast('Error al iniciar sesión con Google');
   }
 }
 
