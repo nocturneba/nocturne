@@ -333,6 +333,48 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 .fav-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:4px 6px;opacity:.5;transition:all .2s;line-height:1;}
 .fav-btn.on{opacity:1;filter:drop-shadow(0 0 4px var(--gold));}
 .fav-btn:hover{opacity:.8;transform:scale(1.2);}
+/* ── EVENTS VIEW ── */
+.ev-hero{padding:32px 20px 20px;background:linear-gradient(180deg,var(--ink2) 0%,var(--ink) 100%);}
+.ev-hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(44px,12vw,72px);font-weight:300;letter-spacing:2px;line-height:1;}
+.ev-hero-title em{background:linear-gradient(90deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic;}
+.ev-hero-sub{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+.ev-hero-date{font-size:11px;color:var(--gold2);letter-spacing:1px;margin-top:4px;}
+.ev-filters{display:flex;gap:6px;padding:16px 16px 8px;overflow-x:auto;scrollbar-width:none;}
+.ev-filters::-webkit-scrollbar{display:none;}
+.ef{padding:7px 14px;border:1px solid var(--line2);background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:1px;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.ef.on{background:var(--gold);color:var(--ink);border-color:var(--gold);}
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;padding:12px 16px 80px;}
+@media(max-width:600px){.events-grid{grid-template-columns:1fr;}}
+
+/* EVENT CARD */
+.ev-card{background:var(--ink2);border:1px solid var(--line);overflow:hidden;position:relative;cursor:pointer;transition:transform .2s,border-color .2s;}
+.ev-card:hover{transform:translateY(-2px);border-color:var(--line2);}
+.ev-card.premium{border-color:var(--gold);}
+.ev-card.premium::before{content:'★ DESTACADO';position:absolute;top:10px;right:10px;background:var(--gold);color:var(--ink);font-size:8px;font-weight:700;letter-spacing:2px;padding:3px 8px;z-index:2;}
+.ev-card-img{height:160px;background:var(--ink3);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:56px;}
+.ev-card-img img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;}
+.ev-card-img-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,6,8,.9) 0%,transparent 60%);}
+.ev-card-date-badge{position:absolute;top:10px;left:10px;background:var(--ink);border:1px solid var(--line2);padding:5px 10px;text-align:center;}
+.ev-card-date-badge .ev-day{font-size:18px;font-weight:700;color:var(--white);line-height:1;}
+.ev-card-date-badge .ev-month{font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.ev-card-today{position:absolute;top:10px;right:10px;background:var(--gold);color:var(--ink);font-size:8px;font-weight:700;letter-spacing:2px;padding:4px 10px;}
+.ev-card-body{padding:14px 16px 16px;}
+.ev-card-venue{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);margin-bottom:4px;}
+.ev-card-name{font-size:17px;font-weight:700;color:var(--white);margin-bottom:3px;line-height:1.2;}
+.ev-card-dj{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.ev-card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.ev-card-tag{font-size:9px;letter-spacing:1px;padding:3px 8px;border:1px solid var(--line2);color:var(--muted);}
+.ev-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ev-card-price{font-size:11px;color:var(--muted);}
+.ev-card-price b{color:var(--white);font-size:13px;}
+.ev-ticket-btns{display:flex;gap:6px;}
+.ev-ticket-btn{padding:8px 14px;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.ev-ticket-btn.primary{background:var(--gold);color:var(--ink);}
+.ev-ticket-btn.primary:hover{background:var(--gold2);}
+.ev-ticket-btn.secondary{background:none;border:1px solid var(--line2);color:var(--pale);}
+.ev-ticket-btn.secondary:hover{border-color:var(--gold);color:var(--gold);}
+.ev-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);}
+
 /* TOAST */
 .toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink3);border:1px solid var(--gold);color:var(--gold);font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 18px;opacity:0;transition:all .3s;z-index:800;white-space:nowrap;}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -349,8 +391,8 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 </header>
 
 <div class="tabs">
-  <button class="tab on" onclick="switchTab('tonight',this)">🔥 Esta Noche</button>
-  <button class="tab" onclick="switchTab('directory',this)">🏛 Directorio</button>
+  <button class="tab on" onclick="switchTab('tonight',this)">🎉 Eventos</button>
+  <button class="tab" onclick="switchTab('directory',this)">🏛 Lugares</button>
   <button class="tab" onclick="switchTab('favorites',this)">❤️ Favs</button>
   <button class="tab" onclick="switchTab('map',this)">🗺 Mapa</button>
   <button class="tab" onclick="switchTab('contact',this)">✉️ Contacto</button>
@@ -358,13 +400,31 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 
 <!-- TONIGHT -->
 <div class="view on" id="tonight-view">
-  <div class="tonight-hdr">
-    <div class="tonight-h">TO<em>NIGHT</em></div>
-    <div class="tonight-meta" id="tonight-date"></div>
+  <!-- EVENTS HERO -->
+  <div class="ev-hero">
+    <div class="ev-hero-title">EVEN<em>TOS</em></div>
+    <div class="ev-hero-sub">Buenos Aires · Esta semana</div>
+    <div id="tonight-date" class="ev-hero-date"></div>
   </div>
-  <div class="tonight-rail" id="tonight-rail"></div>
-  <div class="sec-label">📅 Todos los eventos de la semana</div>
-  <div class="ev-list" id="ev-list"></div>
+
+  <!-- EVENT FILTERS -->
+  <div class="ev-filters">
+    <button class="ef on" onclick="filterEvents('all',this)">Todos</button>
+    <button class="ef" onclick="filterEvents('hoy',this)">🔥 Hoy</button>
+    <button class="ef" onclick="filterEvents('finde',this)">🎉 Este finde</button>
+    <button class="ef" onclick="filterEvents('electronica',this)">⚡ Electrónica</button>
+    <button class="ef" onclick="filterEvents('cachengue',this)">🎵 Cachengue</button>
+    <button class="ef" onclick="filterEvents('reggaeton',this)">🔥 Reggaetón</button>
+    <button class="ef" onclick="filterEvents('premium',this)">💎 Premium</button>
+  </div>
+
+  <!-- SEARCH EVENTS -->
+  <div style="padding:0 16px 4px">
+    <input id="ev-search" type="text" placeholder="🔍 Buscar evento o artista..." oninput="filterEventsSearch(this.value)" style="width:100%;padding:11px 16px;background:var(--ink3);border:1px solid var(--line2);color:var(--white);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1px;outline:none;box-sizing:border-box;">
+  </div>
+
+  <!-- EVENTS GRID -->
+  <div id="events-grid" class="events-grid"></div>
 </div>
 
 <!-- DIRECTORY -->
@@ -576,6 +636,122 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 // ─────────────────────────────────────────────
 // DATA — coordenadas verificadas
 // ─────────────────────────────────────────────
+// ── EVENTS DATA ──
+// Actualizar semanalmente. ticketUrl = link directo al evento en Passline, RA, Instagram, etc.
+const events = [
+  {
+    id: 1, venueId: 1, venueName: "Crobar", zone: "Palermo",
+    name: "Crobar Techno", dj: "Artistas internacionales",
+    d: "28", m: "Feb", hoy: true, genre: ["electronica"],
+    price: 8000, emoji: "🎵",
+    ticketUrl: "https://www.passline.com/busqueda?q=crobar",
+    ticketLabel: "Passline", premium: false,
+    desc: "Noche de techno en la pista principal de Crobar."
+  },
+  {
+    id: 2, venueId: 1, venueName: "Crobar", zone: "Palermo",
+    name: "Carl Cox", dj: "Legendary DJ set",
+    d: "08", m: "Mar", hoy: false, genre: ["electronica", "premium"],
+    price: 15000, emoji: "🎧",
+    ticketUrl: "https://www.passline.com/busqueda?q=carl+cox+crobar",
+    ticketLabel: "Passline", premium: true,
+    desc: "El legendario Carl Cox vuelve a Buenos Aires."
+  },
+  {
+    id: 3, venueId: 10, venueName: "Niceto Club", zone: "Palermo",
+    name: "Club Hostel", dj: "Noche de reggaetón",
+    d: "28", m: "Feb", hoy: true, genre: ["reggaeton"],
+    price: 5000, emoji: "🕺",
+    ticketUrl: "https://www.passline.com/productora/nicetotickets",
+    ticketLabel: "Passline", premium: false,
+    desc: "La fiesta más internacional de Niceto."
+  },
+  {
+    id: 4, venueId: 10, venueName: "Niceto Club", zone: "Palermo",
+    name: "Zizek Club", dj: "Electronic underground",
+    d: "07", m: "Mar", hoy: false, genre: ["electronica"],
+    price: 4000, emoji: "⚡",
+    ticketUrl: "https://www.passline.com/productora/nicetotickets",
+    ticketLabel: "Passline", premium: false,
+    desc: "Underground electrónico en el sótano de Niceto."
+  },
+  {
+    id: 5, venueId: 43, venueName: "Club Bahrein", zone: "Microcentro",
+    name: "Bahrein Techno", dj: "Techno Night",
+    d: "28", m: "Feb", hoy: true, genre: ["electronica", "premium"],
+    price: 10000, emoji: "🖤",
+    ticketUrl: "https://www.passline.com/productora/bahrein",
+    ticketLabel: "Passline", premium: false,
+    desc: "Tres pisos de techno puro en el centro."
+  },
+  {
+    id: 6, venueId: 2, venueName: "Jet Lounge", zone: "Costanera",
+    name: "Sábado VIP", dj: "DJ Residente",
+    d: "28", m: "Feb", hoy: true, genre: ["reggaeton", "cachengue"],
+    price: 10000, emoji: "💎",
+    ticketUrl: "https://www.passline.com/busqueda?q=jet+lounge",
+    ticketLabel: "Passline", premium: true,
+    desc: "La noche más exclusiva de la Costanera."
+  },
+  {
+    id: 7, venueId: 16, venueName: "Palacio Alsina", zone: "Monserrat",
+    name: "Palacio Presenta", dj: "Cachengue & Electrónica",
+    d: "28", m: "Feb", hoy: true, genre: ["cachengue", "electronica"],
+    price: 8000, emoji: "🏛",
+    ticketUrl: "https://www.passline.com/busqueda?q=palacio+alsina",
+    ticketLabel: "Passline", premium: false,
+    desc: "El palacio histórico convertido en pista."
+  },
+  {
+    id: 8, venueId: 3, venueName: "BNN Costanera", zone: "Costanera",
+    name: "BNN Sábado", dj: "Top 50 Argentina",
+    d: "28", m: "Feb", hoy: true, genre: ["reggaeton", "cachengue"],
+    price: 10000, emoji: "🍌",
+    ticketUrl: "https://www.passline.com/busqueda?q=bnn+costanera",
+    ticketLabel: "Passline", premium: false,
+    desc: "El hit de la Costanera Norte."
+  },
+  {
+    id: 9, venueId: 5, venueName: "Fabrika / Moscú", zone: "Costanera",
+    name: "SPFDJ", dj: "Hard Techno",
+    d: "08", m: "Mar", hoy: false, genre: ["electronica"],
+    price: 12000, emoji: "🔊",
+    ticketUrl: "https://www.passline.com/busqueda?q=spfdj+buenos+aires",
+    ticketLabel: "Passline", premium: true,
+    desc: "Hard techno de alto voltaje."
+  },
+  {
+    id: 10, venueId: 5, venueName: "Fabrika / Moscú", zone: "Costanera",
+    name: "Paula Temple", dj: "Industrial Rave",
+    d: "22", m: "Mar", hoy: false, genre: ["electronica"],
+    price: 14000, emoji: "⚙️",
+    ticketUrl: "https://ra.co/events/ar/buenosaires",
+    ticketLabel: "Resident Advisor", premium: true,
+    desc: "Industrial rave con una de las mejores del mundo."
+  },
+  {
+    id: 11, venueId: 13, venueName: "Cruza Polo", zone: "Palermo",
+    name: "Cruza Polo Sábado", dj: "DJ Kessler",
+    d: "28", m: "Feb", hoy: true, genre: ["cachengue", "reggaeton"],
+    price: 5000, emoji: "🏇",
+    ticketUrl: "https://www.passline.com/eventos/cruza-polo-440094",
+    ticketLabel: "Passline", premium: false,
+    desc: "Cachengue y ambiente en Palermo."
+  },
+  {
+    id: 12, venueId: 11, venueName: "Kika Club", zone: "Palermo",
+    name: "Hype by Kika", dj: "Reggaetón + Trap + Hip-hop",
+    d: "28", m: "Feb", hoy: true, genre: ["reggaeton", "cachengue"],
+    price: 4000, emoji: "🎤",
+    ticketUrl: "https://www.passline.com/busqueda?q=kika+club",
+    ticketLabel: "Passline", premium: false,
+    desc: "Trap, reggaetón y hip-hop en Palermo."
+  },
+];
+
+let evFilter = 'all';
+let evSearch = '';
+
 const venues = [
   // ── COSTANERA NORTE / PUNTA CARRASCO ──
   { id:1, type:"boliche", name:"Crobar", zone:"Palermo / Los Arcos", cat:["boliche","electronica","palermo","premium"],
@@ -1358,6 +1534,101 @@ function searchVenues(q) {
   renderDir(currentFilter);
 }
 
+// ── EVENTS ──
+function renderEvents() {
+  const d = new Date();
+  const days = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const dateEl = document.getElementById('tonight-date');
+  if (dateEl) dateEl.textContent = days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+
+  const today = d.getDay(); // 0=Sun, 5=Fri, 6=Sat
+  const isWeekend = today === 5 || today === 6 || today === 0;
+
+  let list = [...events];
+
+  // Filter by tab
+  if (evFilter === 'hoy') list = list.filter(e => e.hoy);
+  else if (evFilter === 'finde') list = list.filter(e => {
+    const dm = e.d + e.m;
+    // Show events this weekend — simplified: show hoy + next 2 days
+    return e.hoy || e.d === String(d.getDate()+1).padStart(2,'0') || e.d === String(d.getDate()+2).padStart(2,'0');
+  });
+  else if (evFilter !== 'all') list = list.filter(e => e.genre.includes(evFilter));
+
+  // Filter by search
+  if (evSearch) list = list.filter(e =>
+    e.name.toLowerCase().includes(evSearch) ||
+    e.dj.toLowerCase().includes(evSearch) ||
+    e.venueName.toLowerCase().includes(evSearch) ||
+    e.zone.toLowerCase().includes(evSearch)
+  );
+
+  // Sort: premium first, then hoy, then by date
+  list.sort((a,b) => {
+    if (a.premium && !b.premium) return -1;
+    if (!a.premium && b.premium) return 1;
+    if (a.hoy && !b.hoy) return -1;
+    if (!a.hoy && b.hoy) return 1;
+    return 0;
+  });
+
+  const grid = document.getElementById('events-grid');
+  if (!grid) return;
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="ev-empty"><div style="font-size:36px;margin-bottom:12px">🎵</div><div>Sin eventos para este filtro</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(ev => {
+    const venue = venues.find(v => v.id === ev.venueId);
+    const genreTags = ev.genre.map(g => `<span class="ev-card-tag">${g}</span>`).join('');
+
+    // Ticket buttons - support multiple providers
+    const mainBtn = ev.ticketUrl
+      ? `<a class="ev-ticket-btn primary" href="${ev.ticketUrl}" target="_blank" onclick="event.stopPropagation()">${ev.ticketLabel || 'Entradas'} →</a>`
+      : '';
+    const raBtn = !ev.ticketUrl?.includes('ra.co') && ev.genre.includes('electronica')
+      ? `<a class="ev-ticket-btn secondary" href="https://ra.co/events/ar/buenosaires" target="_blank" onclick="event.stopPropagation()">RA</a>`
+      : '';
+
+    return `<div class="ev-card${ev.premium?' premium':''}" onclick="openModal(${ev.venueId})">
+      <div class="ev-card-img" style="background:${venue?.bg||'#181520'}">
+        <span style="position:relative;z-index:1">${ev.emoji}</span>
+        <div class="ev-card-img-overlay"></div>
+        <div class="ev-card-date-badge">
+          <div class="ev-day">${ev.d}</div>
+          <div class="ev-month">${ev.m}</div>
+        </div>
+        ${ev.hoy ? '<div class="ev-card-today">HOY</div>' : ''}
+      </div>
+      <div class="ev-card-body">
+        <div class="ev-card-venue">${ev.venueName} · ${ev.zone}</div>
+        <div class="ev-card-name">${ev.name}</div>
+        <div class="ev-card-dj">${ev.dj}</div>
+        <div class="ev-card-tags">${genreTags}</div>
+        <div class="ev-card-foot">
+          <div class="ev-card-price">Desde <b>$${ev.price.toLocaleString('es-AR')}</b></div>
+          <div class="ev-ticket-btns">${raBtn}${mainBtn}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterEvents(f, btn) {
+  evFilter = f;
+  document.querySelectorAll('.ef').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderEvents();
+}
+
+function filterEventsSearch(q) {
+  evSearch = q.toLowerCase().trim();
+  renderEvents();
+}
+
 // ── TABS ──
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
@@ -1366,6 +1637,7 @@ function switchTab(tab, btn) {
   document.getElementById(tab + '-view').classList.add('on');
   if (tab === 'map') initMap();
   if (tab === 'favorites') renderFavs();
+  if (tab === 'tonight') renderEvents();
 }
 
 // ── TONIGHT ──
@@ -1977,7 +2249,7 @@ async function saveVoterToVenue(venueId, remove=false) {
 
 // ── RENDER ALL ──
 function renderAll() {
-  renderTonight();
+  renderEvents();
   renderDir(currentFilter);
 }
 
