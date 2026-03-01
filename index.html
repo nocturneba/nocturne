@@ -459,15 +459,15 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 </header>
 
 <div class="tabs">
-  <button class="tab on" onclick="switchTab('tonight',this)">🎉 Eventos</button>
-  <button class="tab" onclick="switchTab('directory',this)">🏛 Lugares</button>
+  <button class="tab" onclick="switchTab('tonight',this)">🎉 Eventos</button>
+  <button class="tab on" onclick="switchTab('directory',this)">🏛 Lugares</button>
   <button class="tab" onclick="switchTab('favorites',this)">❤️ Favs</button>
   <button class="tab" onclick="switchTab('map',this)">🗺 Mapa</button>
   <button class="tab" onclick="switchTab('contact',this)">✉️ Contacto</button>
 </div>
 
 <!-- TONIGHT -->
-<div class="view on" id="tonight-view">
+<div class="view" id="tonight-view">
   <!-- EVENTS HERO -->
   <div class="ev-hero">
     <div class="ev-hero-title">EVEN<em>TOS</em></div>
@@ -495,16 +495,16 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
   <!-- EVENTS GRID -->
   <div id="events-grid" class="events-grid"></div>
 
-  <!-- RANKING SECTION -->
+  <!-- RANKING SECTION (tonight) -->
   <div class="ranking-section">
     <div class="ranking-title">🔥 Ranking — ¿A dónde va la gente esta semana?</div>
-    <div id="ranking-list"></div>
+    <div id="ranking-list-tonight"></div>
   </div>
   <div style="height:80px"></div>
 </div>
 
 <!-- DIRECTORY -->
-<div class="view" id="directory-view">
+<div class="view on" id="directory-view">
   <div class="dir-hero">
     <div class="dir-h">LA MEJOR<em>NOCHE</em></div>
     <div class="dir-sub">Buenos Aires · Boliches y bares nocturnos</div>
@@ -529,6 +529,12 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
       <button class="fb" onclick="filter('zonanorte',this)">Zona Norte</button>
     </div>
   </div>
+  <!-- RANKING in Lugares -->
+  <div class="ranking-section" id="ranking-in-dir">
+    <div class="ranking-title">🔥 ¿A dónde va la gente esta semana?</div>
+    <div id="ranking-list"></div>
+  </div>
+
   <div style="padding:0 16px 12px">
     <input type="text" style="display:none" aria-hidden="true">
 <input id="search-input" type="text" placeholder="🔍 Buscar boliche o bar..." oninput="searchVenues(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');this.value=''" style="width:100%;padding:12px 16px;background:var(--ink3);border:1px solid var(--line2);color:var(--white);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1px;outline:none;box-sizing:border-box;">
