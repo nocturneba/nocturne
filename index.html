@@ -123,7 +123,7 @@ header{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:ce
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .club-card:hover .card-bg{transform:scale(1.04);}
 .card-img{aspect-ratio:16/9;overflow:hidden;position:relative;}
-.card-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;transition:transform .4s ease;}
+.card-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;transition:transform .4s ease, background-image .5s ease;background-size:cover;background-position:center;}
 .card-badge{position:absolute;top:10px;left:10px;font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:4px 9px;background:var(--gold);color:var(--ink);}
 .card-status{position:absolute;top:10px;right:10px;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;display:flex;align-items:center;gap:4px;}
 .card-status.open{background:rgba(39,174,96,.12);color:#2ecc71;}
@@ -835,6 +835,66 @@ const events = [
 
 let evFilter = 'all';
 let evSearch = '';
+
+// ── GOOGLE PLACES PHOTO SYSTEM ──
+const GPLACES_KEY = 'AIzaSyApigOuNVY7E-gEtd4QfW9jp5Fs5OmEAEw';
+const photoCache = {};
+
+async function getVenuePhoto(venue) {
+  if (photoCache[venue.id]) return photoCache[venue.id];
+  // Check localStorage cache first (24h TTL)
+  const cacheKey = 'nocheba-photo-' + venue.id;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      const p = JSON.parse(cached);
+      if (Date.now() - p.ts < 86400000) { photoCache[venue.id] = p.url; return p.url; }
+    } catch(e) {}
+  }
+  try {
+    // Search by name + Buenos Aires
+    const query = encodeURIComponent(venue.name + ' Buenos Aires Argentina');
+    const searchUrl = 'https://places.googleapis.com/v1/places:searchText';
+    const res = await fetch(searchUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GPLACES_KEY,
+        'X-Goog-FieldMask': 'places.photos'
+      },
+      body: JSON.stringify({ textQuery: venue.name + ' boliche Buenos Aires', maxResultCount: 1 })
+    });
+    const data = await res.json();
+    const photo = data.places?.[0]?.photos?.[0];
+    if (photo) {
+      const photoName = photo.name;
+      const url = 'https://places.googleapis.com/v1/' + photoName + '/media?maxHeightPx=400&maxWidthPx=600&key=' + GPLACES_KEY;
+      photoCache[venue.id] = url;
+      localStorage.setItem(cacheKey, JSON.stringify({ url, ts: Date.now() }));
+      return url;
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function loadAllPhotos() {
+  for (const v of venues) {
+    getVenuePhoto(v).then(function(url) {
+      if (!url) return;
+      // Find card-img divs for this venue and update their inner card-bg
+      var cardImgs = document.querySelectorAll('[data-venue-id="' + v.id + '"]');
+      cardImgs.forEach(function(cardImg) {
+        var bg = cardImg.querySelector('.card-bg');
+        if (bg) {
+          bg.style.backgroundImage = 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%), url(' + url + ')';
+          bg.style.backgroundSize = 'cover';
+          bg.style.backgroundPosition = 'center';
+          bg.style.fontSize = '28px'; // smaller emoji when photo is shown
+        }
+      });
+    });
+  }
+}
 
 const venues = [
   // ── COSTANERA NORTE / PUNTA CARRASCO ──
@@ -1669,7 +1729,7 @@ function renderFavs() {
   grid.innerHTML = list.map((v,i) => {
     const on = isMyVote(v.id);
     return `<div class="club-card" style="animation-delay:${i*.07}s" onclick="openModal(${v.id})">
-      <div class="card-img">
+      <div class="card-img" data-venue-id="${v.id}">
         <div class="card-bg" style="background:${v.bg}">${v.emoji}</div>
         <div class="card-badge">${v.badge}</div>
         <div class="card-status ${v.open?'open':'closed'}"><span class="status-dot"></span>${v.open?'Abierto':'Cerrado'}</div>
@@ -1873,7 +1933,7 @@ function renderDir(f) {
     const on = isMyVote(v.id);
     const hoy = v.events.some(e => e.hoy);
     return `<div class="club-card" style="animation-delay:${i*.07}s" onclick="openModal(${v.id})">
-      <div class="card-img">
+      <div class="card-img" data-venue-id="${v.id}">
         <div class="card-bg" style="background:${v.bg}">${v.emoji}</div>
         <div class="card-badge">${v.badge}</div>
         <div class="card-status ${v.open?'open':'closed'}"><span class="status-dot"></span>${v.open?'Abierto':'Cerrado'}</div>
