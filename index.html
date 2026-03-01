@@ -2,8 +2,20 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nightlife</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Nightlife BsAs</title>
+<meta name="description" content="La mejor guía de boliches y bares de Buenos Aires. Votos en tiempo real, eventos, entradas.">
+<meta name="theme-color" content="#080608">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nightlife">
+<link rel="manifest" href="manifest.json">
+<!-- Open Graph para compartir por WhatsApp/IG -->
+<meta property="og:title" content="Nightlife BsAs 🌙">
+<meta property="og:description" content="¿A dónde salís esta noche? Votá tu boliche favorito de Buenos Aires.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1929,6 +1941,51 @@ async function init() {
   updateHeader();
 }
 init();
+</script>
+<script>
+// ── PWA SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+// ── INSTALL PROMPT (Android) ──
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 30 seconds
+  setTimeout(() => {
+    if (deferredPrompt) showInstallBanner();
+  }, 30000);
+});
+
+function showInstallBanner() {
+  const banner = document.createElement('div');
+  banner.id = 'install-banner';
+  banner.innerHTML = `
+    <div style="position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#181520,#201c2a);border-top:1px solid #352f42;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;z-index:9999;font-family:'Montserrat',sans-serif">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#f5f0f8">📲 Instalar Nightlife</div>
+        <div style="font-size:10px;color:#8a80a0;margin-top:2px">Agregá la app a tu pantalla de inicio</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('install-banner').remove();deferredPrompt=null" style="background:none;border:1px solid #352f42;color:#8a80a0;padding:8px 12px;font-size:10px;font-family:'Montserrat',sans-serif;cursor:pointer">Ahora no</button>
+        <button onclick="installApp()" style="background:linear-gradient(135deg,#7c3aed,#c4527a);border:none;color:#fff;padding:8px 16px;font-size:10px;font-weight:700;letter-spacing:1px;font-family:'Montserrat',sans-serif;cursor:pointer">INSTALAR</button>
+      </div>
+    </div>`;
+  document.body.appendChild(banner);
+}
+
+async function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.remove();
+}
 </script>
 </body>
 </html>
